@@ -12,6 +12,7 @@ import (
 	"arktie.org/internal/data"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/oauth"
+	"arktie.org/internal/usecase/user"
 )
 
 // newServer is the kessoku-generated DI initializer.
@@ -22,13 +23,23 @@ import (
 var _ = kessoku.Inject[*http.Server](
 	"newServer",
 	kessoku.Provide(data.NewClient),
-	kessoku.Provide(oauth.NewService),
 
+	// usecase
+	kessoku.Provide(user.NewUsecase),
+	kessoku.Bind[oauth.UserAttempter](
+		kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter { return uc }),
+	),
+
+	// services
+	kessoku.Provide(oauth.NewService),
 	kessoku.Bind[server.OAuthHandler](
 		kessoku.Provide(func(s *oauth.Service) server.OAuthHandler { return s }),
 	),
+
+	// handlers
 	kessoku.Provide(server.NewHandler),
 
+	// server
 	kessoku.Provide(func(cfg *data.Config, handler http.Handler) *http.Server {
 		return &http.Server{
 			Addr:    cfg.Server.Addr,

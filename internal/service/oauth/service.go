@@ -1,17 +1,21 @@
 package oauth
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
+	"arktie.org/ent"
 	"arktie.org/internal/data"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/lib/libjwt"
 	"arktie.org/internal/lib/liblogs"
 	"arktie.org/internal/server/middleware"
+	"arktie.org/internal/usecase/user"
 
+	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -19,14 +23,23 @@ import (
 type Service struct {
 	cfg    *data.Config
 	client *data.Client
+
+	attempter UserAttempter
 }
 
-func NewService(cfg *data.Config, client *data.Client) *Service {
+func NewService(cfg *data.Config, client *data.Client, attempter UserAttempter) *Service {
 	return &Service{
-		cfg:    cfg,
-		client: client,
+		cfg:       cfg,
+		client:    client,
+		attempter: attempter,
 	}
 }
+
+type UserAttempter interface {
+	Attempt(context.Context, *oauth.ClientSessionData, *identity.Identity) (*ent.User, error)
+}
+
+var _ UserAttempter = &user.Usecase{}
 
 // ClientConfig handles GET /oauth/client-metadata.json
 func (svc *Service) ClientConfig(w http.ResponseWriter, r *http.Request) {
@@ -73,9 +86,17 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 		slog.WarnContext(r.Context(), "failed to lookup DID", liblogs.ErrAttr(err), slog.Any("at_session", atSession))
 	}
 
+	user, err := svc.attempter.Attempt(r.Context(), atSession, atIdent)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "failed to attempt user", liblogs.ErrAttr(err))
+		http.Redirect(w, r, "/?error=attempt_failed", http.StatusFound)
+		return
+	}
+
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		libjwt.NewClaim(svc.cfg).
+			WithUser(user).
 			WithATSession(atSession).
 			WithATIdentity(atIdent),
 	)

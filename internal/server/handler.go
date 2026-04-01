@@ -8,6 +8,7 @@ import (
 	"arktie.org/internal/data"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/server/middleware"
+	"arktie.org/internal/service/oauth"
 )
 
 type OAuthHandler interface {
@@ -16,6 +17,8 @@ type OAuthHandler interface {
 	Callback(http.ResponseWriter, *http.Request)
 	Logout(http.ResponseWriter, *http.Request)
 }
+
+var _ OAuthHandler = &oauth.Service{}
 
 func NewHandler(cfg *data.Config, oauth OAuthHandler) http.Handler {
 	mux := chi.NewMux()

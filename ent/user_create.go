@@ -21,9 +21,9 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetAcountDid sets the "acount_did" field.
-func (_c *UserCreate) SetAcountDid(v string) *UserCreate {
-	_c.mutation.SetAcountDid(v)
+// SetAccountDid sets the "account_did" field.
+func (_c *UserCreate) SetAccountDid(v string) *UserCreate {
+	_c.mutation.SetAccountDid(v)
 	return _c
 }
 
@@ -144,8 +144,8 @@ func (_c *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.AcountDid(); !ok {
-		return &ValidationError{Name: "acount_did", err: errors.New(`ent: missing required field "User.acount_did"`)}
+	if _, ok := _c.mutation.AccountDid(); !ok {
+		return &ValidationError{Name: "account_did", err: errors.New(`ent: missing required field "User.account_did"`)}
 	}
 	if _, ok := _c.mutation.EncryptionKey(); !ok {
 		return &ValidationError{Name: "encryption_key", err: errors.New(`ent: missing required field "User.encryption_key"`)}
@@ -194,9 +194,9 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.AcountDid(); ok {
-		_spec.SetField(user.FieldAcountDid, field.TypeString, value)
-		_node.AcountDid = value
+	if value, ok := _c.mutation.AccountDid(); ok {
+		_spec.SetField(user.FieldAccountDid, field.TypeString, value)
+		_node.AccountDid = value
 	}
 	if value, ok := _c.mutation.EncryptionKey(); ok {
 		_spec.SetField(user.FieldEncryptionKey, field.TypeBytes, value)

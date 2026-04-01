@@ -14,8 +14,8 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAcountDid holds the string denoting the acount_did field in the database.
-	FieldAcountDid = "acount_did"
+	// FieldAccountDid holds the string denoting the account_did field in the database.
+	FieldAccountDid = "account_did"
 	// FieldEncryptionKey holds the string denoting the encryption_key field in the database.
 	FieldEncryptionKey = "encryption_key"
 	// FieldLastActiveAt holds the string denoting the last_active_at field in the database.
@@ -31,7 +31,7 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldAcountDid,
+	FieldAccountDid,
 	FieldEncryptionKey,
 	FieldLastActiveAt,
 	FieldCreatedAt,
@@ -69,9 +69,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByAcountDid orders the results by the acount_did field.
-func ByAcountDid(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAcountDid, opts...).ToFunc()
+// ByAccountDid orders the results by the account_did field.
+func ByAccountDid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountDid, opts...).ToFunc()
 }
 
 // ByLastActiveAt orders the results by the last_active_at field.

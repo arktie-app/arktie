@@ -34,7 +34,7 @@ type UserMutation struct {
 	op             Op
 	typ            string
 	id             *uuid.UUID
-	acount_did     *string
+	account_did    *string
 	encryption_key *[]byte
 	last_active_at *time.Time
 	created_at     *time.Time
@@ -149,40 +149,40 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
-// SetAcountDid sets the "acount_did" field.
-func (m *UserMutation) SetAcountDid(s string) {
-	m.acount_did = &s
+// SetAccountDid sets the "account_did" field.
+func (m *UserMutation) SetAccountDid(s string) {
+	m.account_did = &s
 }
 
-// AcountDid returns the value of the "acount_did" field in the mutation.
-func (m *UserMutation) AcountDid() (r string, exists bool) {
-	v := m.acount_did
+// AccountDid returns the value of the "account_did" field in the mutation.
+func (m *UserMutation) AccountDid() (r string, exists bool) {
+	v := m.account_did
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAcountDid returns the old "acount_did" field's value of the User entity.
+// OldAccountDid returns the old "account_did" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldAcountDid(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldAccountDid(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAcountDid is only allowed on UpdateOne operations")
+		return v, errors.New("OldAccountDid is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAcountDid requires an ID field in the mutation")
+		return v, errors.New("OldAccountDid requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAcountDid: %w", err)
+		return v, fmt.Errorf("querying old value for OldAccountDid: %w", err)
 	}
-	return oldValue.AcountDid, nil
+	return oldValue.AccountDid, nil
 }
 
-// ResetAcountDid resets all changes to the "acount_did" field.
-func (m *UserMutation) ResetAcountDid() {
-	m.acount_did = nil
+// ResetAccountDid resets all changes to the "account_did" field.
+func (m *UserMutation) ResetAccountDid() {
+	m.account_did = nil
 }
 
 // SetEncryptionKey sets the "encryption_key" field.
@@ -364,8 +364,8 @@ func (m *UserMutation) Type() string {
 // AddedFields().
 func (m *UserMutation) Fields() []string {
 	fields := make([]string, 0, 5)
-	if m.acount_did != nil {
-		fields = append(fields, user.FieldAcountDid)
+	if m.account_did != nil {
+		fields = append(fields, user.FieldAccountDid)
 	}
 	if m.encryption_key != nil {
 		fields = append(fields, user.FieldEncryptionKey)
@@ -387,8 +387,8 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldAcountDid:
-		return m.AcountDid()
+	case user.FieldAccountDid:
+		return m.AccountDid()
 	case user.FieldEncryptionKey:
 		return m.EncryptionKey()
 	case user.FieldLastActiveAt:
@@ -406,8 +406,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldAcountDid:
-		return m.OldAcountDid(ctx)
+	case user.FieldAccountDid:
+		return m.OldAccountDid(ctx)
 	case user.FieldEncryptionKey:
 		return m.OldEncryptionKey(ctx)
 	case user.FieldLastActiveAt:
@@ -425,12 +425,12 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldAcountDid:
+	case user.FieldAccountDid:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAcountDid(v)
+		m.SetAccountDid(v)
 		return nil
 	case user.FieldEncryptionKey:
 		v, ok := value.([]byte)
@@ -509,8 +509,8 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldAcountDid:
-		m.ResetAcountDid()
+	case user.FieldAccountDid:
+		m.ResetAccountDid()
 		return nil
 	case user.FieldEncryptionKey:
 		m.ResetEncryptionKey()

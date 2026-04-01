@@ -28,16 +28,16 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetAcountDid sets the "acount_did" field.
-func (_u *UserUpdate) SetAcountDid(v string) *UserUpdate {
-	_u.mutation.SetAcountDid(v)
+// SetAccountDid sets the "account_did" field.
+func (_u *UserUpdate) SetAccountDid(v string) *UserUpdate {
+	_u.mutation.SetAccountDid(v)
 	return _u
 }
 
-// SetNillableAcountDid sets the "acount_did" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAcountDid(v *string) *UserUpdate {
+// SetNillableAccountDid sets the "account_did" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAccountDid(v *string) *UserUpdate {
 	if v != nil {
-		_u.SetAcountDid(*v)
+		_u.SetAccountDid(*v)
 	}
 	return _u
 }
@@ -118,8 +118,8 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.AcountDid(); ok {
-		_spec.SetField(user.FieldAcountDid, field.TypeString, value)
+	if value, ok := _u.mutation.AccountDid(); ok {
+		_spec.SetField(user.FieldAccountDid, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.EncryptionKey(); ok {
 		_spec.SetField(user.FieldEncryptionKey, field.TypeBytes, value)
@@ -150,16 +150,16 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetAcountDid sets the "acount_did" field.
-func (_u *UserUpdateOne) SetAcountDid(v string) *UserUpdateOne {
-	_u.mutation.SetAcountDid(v)
+// SetAccountDid sets the "account_did" field.
+func (_u *UserUpdateOne) SetAccountDid(v string) *UserUpdateOne {
+	_u.mutation.SetAccountDid(v)
 	return _u
 }
 
-// SetNillableAcountDid sets the "acount_did" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAcountDid(v *string) *UserUpdateOne {
+// SetNillableAccountDid sets the "account_did" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAccountDid(v *string) *UserUpdateOne {
 	if v != nil {
-		_u.SetAcountDid(*v)
+		_u.SetAccountDid(*v)
 	}
 	return _u
 }
@@ -270,8 +270,8 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.AcountDid(); ok {
-		_spec.SetField(user.FieldAcountDid, field.TypeString, value)
+	if value, ok := _u.mutation.AccountDid(); ok {
+		_spec.SetField(user.FieldAccountDid, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.EncryptionKey(); ok {
 		_spec.SetField(user.FieldEncryptionKey, field.TypeBytes, value)

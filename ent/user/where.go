@@ -55,9 +55,9 @@ func IDLTE(id uuid.UUID) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
-// AcountDid applies equality check predicate on the "acount_did" field. It's identical to AcountDidEQ.
-func AcountDid(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAcountDid, v))
+// AccountDid applies equality check predicate on the "account_did" field. It's identical to AccountDidEQ.
+func AccountDid(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAccountDid, v))
 }
 
 // EncryptionKey applies equality check predicate on the "encryption_key" field. It's identical to EncryptionKeyEQ.
@@ -80,69 +80,69 @@ func UpdatedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// AcountDidEQ applies the EQ predicate on the "acount_did" field.
-func AcountDidEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAcountDid, v))
+// AccountDidEQ applies the EQ predicate on the "account_did" field.
+func AccountDidEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAccountDid, v))
 }
 
-// AcountDidNEQ applies the NEQ predicate on the "acount_did" field.
-func AcountDidNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAcountDid, v))
+// AccountDidNEQ applies the NEQ predicate on the "account_did" field.
+func AccountDidNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAccountDid, v))
 }
 
-// AcountDidIn applies the In predicate on the "acount_did" field.
-func AcountDidIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldAcountDid, vs...))
+// AccountDidIn applies the In predicate on the "account_did" field.
+func AccountDidIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldAccountDid, vs...))
 }
 
-// AcountDidNotIn applies the NotIn predicate on the "acount_did" field.
-func AcountDidNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldAcountDid, vs...))
+// AccountDidNotIn applies the NotIn predicate on the "account_did" field.
+func AccountDidNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldAccountDid, vs...))
 }
 
-// AcountDidGT applies the GT predicate on the "acount_did" field.
-func AcountDidGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldAcountDid, v))
+// AccountDidGT applies the GT predicate on the "account_did" field.
+func AccountDidGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldAccountDid, v))
 }
 
-// AcountDidGTE applies the GTE predicate on the "acount_did" field.
-func AcountDidGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldAcountDid, v))
+// AccountDidGTE applies the GTE predicate on the "account_did" field.
+func AccountDidGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldAccountDid, v))
 }
 
-// AcountDidLT applies the LT predicate on the "acount_did" field.
-func AcountDidLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldAcountDid, v))
+// AccountDidLT applies the LT predicate on the "account_did" field.
+func AccountDidLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldAccountDid, v))
 }
 
-// AcountDidLTE applies the LTE predicate on the "acount_did" field.
-func AcountDidLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldAcountDid, v))
+// AccountDidLTE applies the LTE predicate on the "account_did" field.
+func AccountDidLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldAccountDid, v))
 }
 
-// AcountDidContains applies the Contains predicate on the "acount_did" field.
-func AcountDidContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldAcountDid, v))
+// AccountDidContains applies the Contains predicate on the "account_did" field.
+func AccountDidContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldAccountDid, v))
 }
 
-// AcountDidHasPrefix applies the HasPrefix predicate on the "acount_did" field.
-func AcountDidHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldAcountDid, v))
+// AccountDidHasPrefix applies the HasPrefix predicate on the "account_did" field.
+func AccountDidHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldAccountDid, v))
 }
 
-// AcountDidHasSuffix applies the HasSuffix predicate on the "acount_did" field.
-func AcountDidHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldAcountDid, v))
+// AccountDidHasSuffix applies the HasSuffix predicate on the "account_did" field.
+func AccountDidHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldAccountDid, v))
 }
 
-// AcountDidEqualFold applies the EqualFold predicate on the "acount_did" field.
-func AcountDidEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldAcountDid, v))
+// AccountDidEqualFold applies the EqualFold predicate on the "account_did" field.
+func AccountDidEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldAccountDid, v))
 }
 
-// AcountDidContainsFold applies the ContainsFold predicate on the "acount_did" field.
-func AcountDidContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldAcountDid, v))
+// AccountDidContainsFold applies the ContainsFold predicate on the "account_did" field.
+func AccountDidContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldAccountDid, v))
 }
 
 // EncryptionKeyEQ applies the EQ predicate on the "encryption_key" field.

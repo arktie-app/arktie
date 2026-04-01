@@ -18,8 +18,8 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// AcountDid holds the value of the "acount_did" field.
-	AcountDid string `json:"acount_did,omitempty"`
+	// AccountDid holds the value of the "account_did" field.
+	AccountDid string `json:"account_did,omitempty"`
 	// EncryptionKey holds the value of the "encryption_key" field.
 	EncryptionKey []byte `json:"encryption_key,omitempty"`
 	// LastActiveAt holds the value of the "last_active_at" field.
@@ -38,7 +38,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldEncryptionKey:
 			values[i] = new([]byte)
-		case user.FieldAcountDid:
+		case user.FieldAccountDid:
 			values[i] = new(sql.NullString)
 		case user.FieldLastActiveAt, user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -65,11 +65,11 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.ID = *value
 			}
-		case user.FieldAcountDid:
+		case user.FieldAccountDid:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field acount_did", values[i])
+				return fmt.Errorf("unexpected type %T for field account_did", values[i])
 			} else if value.Valid {
-				_m.AcountDid = value.String
+				_m.AccountDid = value.String
 			}
 		case user.FieldEncryptionKey:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -131,8 +131,8 @@ func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("acount_did=")
-	builder.WriteString(_m.AcountDid)
+	builder.WriteString("account_did=")
+	builder.WriteString(_m.AccountDid)
 	builder.WriteString(", ")
 	builder.WriteString("encryption_key=")
 	builder.WriteString(fmt.Sprintf("%v", _m.EncryptionKey))
