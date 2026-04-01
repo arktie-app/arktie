@@ -5,15 +5,17 @@ import (
 	"database/sql"
 	"testing"
 
-	"arktie.org/ent"
-	"arktie.org/ent/enttest"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 
-	"arktie.org/internal/data"
+	"arktie.org/ent"
+	"arktie.org/ent/enttest"
+
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	_ "modernc.org/sqlite"
+
+	"arktie.org/internal/data"
 )
 
 func setupUsecase(t *testing.T) *Usecase {

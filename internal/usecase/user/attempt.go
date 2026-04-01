@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 
-	"arktie.org/ent"
-	"arktie.org/ent/user"
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/identity"
+
+	"arktie.org/ent"
+	"arktie.org/ent/user"
 )
 
 func (uc *Usecase) Attempt(ctx context.Context, session *oauth.ClientSessionData, identity *identity.Identity) (*ent.User, error) {
