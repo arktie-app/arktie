@@ -4,10 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/redis/go-redis/v9"
+)
+
+const (
+	SessionTTL     = 14 * 24 * time.Hour
+	AuthRequestTTL = 30 * time.Minute
 )
 
 type RedisStore struct {
@@ -53,7 +59,7 @@ func (s *RedisStore) SaveSession(ctx context.Context, sess oauth.ClientSessionDa
 		return fmt.Errorf("failed to marshal session: %w", err)
 	}
 
-	if err := s.client.Set(ctx, sessionKey(sess.AccountDID, sess.SessionID), data, 0).Err(); err != nil {
+	if err := s.client.Set(ctx, sessionKey(sess.AccountDID, sess.SessionID), data, SessionTTL).Err(); err != nil {
 		return fmt.Errorf("failed to save session: %w", err)
 	}
 
@@ -88,21 +94,17 @@ func (s *RedisStore) GetAuthRequestInfo(ctx context.Context, state string) (*oau
 func (s *RedisStore) SaveAuthRequestInfo(ctx context.Context, info oauth.AuthRequestData) error {
 	key := authRequestKey(info.State)
 
-	exists, err := s.client.Exists(ctx, key).Result()
-	if err != nil {
-		return fmt.Errorf("failed to check auth request existence: %w", err)
-	}
-	if exists > 0 {
-		return fmt.Errorf("auth request already saved for state %s", info.State)
-	}
-
 	data, err := json.Marshal(info)
 	if err != nil {
 		return fmt.Errorf("failed to marshal auth request info: %w", err)
 	}
 
-	if err := s.client.Set(ctx, key, data, 0).Err(); err != nil {
+	ok, err := s.client.SetNX(ctx, key, data, AuthRequestTTL).Result()
+	if err != nil {
 		return fmt.Errorf("failed to save auth request info: %w", err)
+	}
+	if !ok {
+		return fmt.Errorf("auth request already saved for state %s", info.State)
 	}
 
 	return nil
