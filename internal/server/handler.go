@@ -3,10 +3,11 @@ package server
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"arktie.org/internal/data"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/server/middleware"
-	"github.com/go-chi/chi/v5"
 )
 
 type OAuthHandler interface {

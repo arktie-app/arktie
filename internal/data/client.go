@@ -1,10 +1,11 @@
 package data
 
 import (
-	"arktie.org/pkg/atproto"
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+
+	"arktie.org/pkg/atproto"
 )
 
 type Client struct {

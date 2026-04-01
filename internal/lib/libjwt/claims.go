@@ -3,11 +3,12 @@ package libjwt
 import (
 	"time"
 
-	"arktie.org/internal/data"
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+
+	"arktie.org/internal/data"
 )
 
 type Claim struct {
