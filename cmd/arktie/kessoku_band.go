@@ -23,7 +23,7 @@ func newServer(config *data.Config) (*http.Server, error) {
 	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
 		return s
 	})).Fn()(service)
-	handler := kessoku.Provide(server.NewHandler).Fn()(oauthHandler)
+	handler := kessoku.Provide(server.NewHandler).Fn()(config, oauthHandler)
 	server0 := kessoku.Provide(func(cfg *data.Config, handler http.Handler) *http.Server {
 		return &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}
 	}).Fn()(config, handler)

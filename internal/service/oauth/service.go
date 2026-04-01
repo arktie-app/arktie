@@ -4,14 +4,20 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"arktie.org/internal/data"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/lib/libjwt"
 	"arktie.org/internal/lib/liblogs"
+	"arktie.org/internal/server/middleware"
 
 	"github.com/bluesky-social/indigo/atproto/identity"
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	sessionCookieName = "arktie_cookie"
 )
 
 type Service struct {
@@ -86,13 +92,33 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "arktie_session",
+		Name:     sessionCookieName,
 		Value:    tokenString,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   !svc.cfg.App.IsLocal(),
 		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().AddDate(0, 0, 14),
 	})
 
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func (svc *Service) Logout(w http.ResponseWriter, r *http.Request) {
+	user := middleware.UserFromContext(r.Context())
+
+	if user != nil {
+		if err := svc.client.OAuth.Logout(r.Context(), user.Session.AccountDID, user.Session.SessionID); err != nil {
+			slog.WarnContext(r.Context(), "failed to logout from oauth client", liblogs.ErrAttr(err))
+		}
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     sessionCookieName,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !svc.cfg.App.IsLocal(),
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Unix(0, 0),
+	})
 }
