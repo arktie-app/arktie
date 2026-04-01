@@ -3,6 +3,7 @@ package atproto
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
@@ -14,6 +15,12 @@ func TestRedisStore_Session(t *testing.T) {
 	ctx := context.Background()
 	db, mock := redismock.NewClientMock()
 	store := NewRedisStore(db)
+
+	t.Cleanup(func() {
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+		}
+	})
 
 	did := syntax.DID("did:plc:123")
 	sessionID := "sess-123"
@@ -46,12 +53,39 @@ func TestRedisStore_Session(t *testing.T) {
 		}
 	})
 
+	t.Run("GetSession_RedisError", func(t *testing.T) {
+		mock.ExpectGet(key).SetErr(fmt.Errorf("redis down"))
+
+		_, err := store.GetSession(ctx, did, sessionID)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+	})
+
+	t.Run("GetSession_InvalidJSON", func(t *testing.T) {
+		mock.ExpectGet(key).SetVal("invalid-json")
+
+		_, err := store.GetSession(ctx, did, sessionID)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+	})
+
 	t.Run("SaveSession_Success", func(t *testing.T) {
 		mock.ExpectSet(key, data, SessionTTL).SetVal("OK")
 
 		err := store.SaveSession(ctx, sess)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("SaveSession_RedisError", func(t *testing.T) {
+		mock.ExpectSet(key, data, SessionTTL).SetErr(fmt.Errorf("redis down"))
+
+		err := store.SaveSession(ctx, sess)
+		if err == nil {
+			t.Error("expected error, got nil")
 		}
 	})
 
@@ -63,16 +97,18 @@ func TestRedisStore_Session(t *testing.T) {
 			t.Errorf("expected no error, got %v", err)
 		}
 	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-	}
 }
 
 func TestRedisStore_AuthRequestInfo(t *testing.T) {
 	ctx := context.Background()
 	db, mock := redismock.NewClientMock()
 	store := NewRedisStore(db)
+
+	t.Cleanup(func() {
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+		}
+	})
 
 	state := "state-123"
 	key := authRequestKey(state)
@@ -103,6 +139,15 @@ func TestRedisStore_AuthRequestInfo(t *testing.T) {
 		}
 	})
 
+	t.Run("GetAuthRequestInfo_InvalidJSON", func(t *testing.T) {
+		mock.ExpectGet(key).SetVal("invalid-json")
+
+		_, err := store.GetAuthRequestInfo(ctx, state)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+	})
+
 	t.Run("SaveAuthRequestInfo_Success", func(t *testing.T) {
 		mock.ExpectSetNX(key, data, AuthRequestTTL).SetVal(true)
 
@@ -121,6 +166,15 @@ func TestRedisStore_AuthRequestInfo(t *testing.T) {
 		}
 	})
 
+	t.Run("SaveAuthRequestInfo_RedisError", func(t *testing.T) {
+		mock.ExpectSetNX(key, data, AuthRequestTTL).SetErr(fmt.Errorf("redis down"))
+
+		err := store.SaveAuthRequestInfo(ctx, info)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+	})
+
 	t.Run("DeleteAuthRequestInfo_Success", func(t *testing.T) {
 		mock.ExpectDel(key).SetVal(1)
 
@@ -129,8 +183,4 @@ func TestRedisStore_AuthRequestInfo(t *testing.T) {
 			t.Errorf("expected no error, got %v", err)
 		}
 	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-	}
 }
