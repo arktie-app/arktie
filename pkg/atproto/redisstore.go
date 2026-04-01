@@ -99,11 +99,14 @@ func (s *RedisStore) SaveAuthRequestInfo(ctx context.Context, info oauth.AuthReq
 		return fmt.Errorf("failed to marshal auth request info: %w", err)
 	}
 
-	ok, err := s.client.SetNX(ctx, key, data, AuthRequestTTL).Result()
+	result, err := s.client.SetArgs(ctx, key, data, redis.SetArgs{
+		Mode: "NX",
+		TTL:  AuthRequestTTL,
+	}).Result()
 	if err != nil {
 		return fmt.Errorf("failed to save auth request info: %w", err)
 	}
-	if !ok {
+	if result == "" {
 		return fmt.Errorf("auth request already saved for state %s", info.State)
 	}
 

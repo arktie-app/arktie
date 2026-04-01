@@ -9,6 +9,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"github.com/go-redis/redismock/v9"
+	"github.com/redis/go-redis/v9"
 )
 
 func TestRedisStore_Session(t *testing.T) {
@@ -149,7 +150,10 @@ func TestRedisStore_AuthRequestInfo(t *testing.T) {
 	})
 
 	t.Run("SaveAuthRequestInfo_Success", func(t *testing.T) {
-		mock.ExpectSetNX(key, data, AuthRequestTTL).SetVal(true)
+		mock.ExpectSetArgs(key, data, redis.SetArgs{
+			Mode: "NX",
+			TTL:  AuthRequestTTL,
+		}).SetVal("OK")
 
 		err := store.SaveAuthRequestInfo(ctx, info)
 		if err != nil {
@@ -158,7 +162,10 @@ func TestRedisStore_AuthRequestInfo(t *testing.T) {
 	})
 
 	t.Run("SaveAuthRequestInfo_AlreadyExists", func(t *testing.T) {
-		mock.ExpectSetNX(key, data, AuthRequestTTL).SetVal(false)
+		mock.ExpectSetArgs(key, data, redis.SetArgs{
+			Mode: "NX",
+			TTL:  AuthRequestTTL,
+		}).SetVal("")
 
 		err := store.SaveAuthRequestInfo(ctx, info)
 		if err == nil {
@@ -167,7 +174,10 @@ func TestRedisStore_AuthRequestInfo(t *testing.T) {
 	})
 
 	t.Run("SaveAuthRequestInfo_RedisError", func(t *testing.T) {
-		mock.ExpectSetNX(key, data, AuthRequestTTL).SetErr(fmt.Errorf("redis down"))
+		mock.ExpectSetArgs(key, data, redis.SetArgs{
+			Mode: "NX",
+			TTL:  AuthRequestTTL,
+		}).SetErr(fmt.Errorf("redis down"))
 
 		err := store.SaveAuthRequestInfo(ctx, info)
 		if err == nil {
