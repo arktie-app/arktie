@@ -18,7 +18,7 @@ type ctxKey struct{}
 // (Bearer token) or the session cookie, validates it, and stores the parsed
 // claim in the request context.
 //
-// It not blocks request even if user is not authenticated.
+// It does not block request even if user is not authenticated.
 func User(cfg *data.Config) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

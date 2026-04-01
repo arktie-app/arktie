@@ -103,10 +103,8 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 func (svc *Service) Logout(w http.ResponseWriter, r *http.Request) {
 	user := middleware.UserFromContext(r.Context())
 
-	if user != nil {
-		if err := svc.client.OAuth.Logout(r.Context(), user.Session.AccountDID, user.Session.SessionID); err != nil {
-			slog.WarnContext(r.Context(), "failed to logout from oauth client", liblogs.ErrAttr(err))
-		}
+	if err := svc.client.OAuth.Logout(r.Context(), user.Session.AccountDID, user.Session.SessionID); err != nil {
+		slog.WarnContext(r.Context(), "failed to logout from oauth client", liblogs.ErrAttr(err))
 	}
 
 	http.SetCookie(w, &http.Cookie{

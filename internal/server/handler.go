@@ -25,7 +25,7 @@ func NewHandler(cfg *data.Config, oauth OAuthHandler) http.Handler {
 		r.HandleFunc("GET /oauth/start", oauth.Start)
 		r.HandleFunc("GET /oauth/callback", oauth.Callback)
 
-		r.With(middleware.User(cfg)).
+		r.With(middleware.RequireUser(cfg)).
 			HandleFunc("POST /api/logout", oauth.Logout)
 	})
 
