@@ -7,9 +7,11 @@ import (
 
 	"arktie.org/internal/data"
 	"arktie.org/internal/lib/libhttp"
+	"arktie.org/internal/lib/libjwt"
 	"arktie.org/internal/lib/liblogs"
 
 	"github.com/bluesky-social/indigo/atproto/identity"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Service struct {
@@ -69,7 +71,28 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 		slog.WarnContext(r.Context(), "failed to lookup DID", liblogs.ErrAttr(err), slog.Any("at_session", atSession))
 	}
 
-	_, _ = atSession, atIdent
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		libjwt.NewClaim(svc.cfg).
+			WithATSession(atSession).
+			WithATIdentity(atIdent),
+	)
+
+	tokenString, err := token.SignedString(svc.cfg.App.Key)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "failed to sign JWT", liblogs.ErrAttr(err))
+		http.Redirect(w, r, "/?error=internal", http.StatusFound)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "arktie_session",
+		Value:    tokenString,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   !svc.cfg.App.IsLocal(),
+		SameSite: http.SameSiteLaxMode,
+	})
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }

@@ -3,7 +3,9 @@ module arktie.org
 go 1.26.1
 
 require (
+	github.com/bluesky-social/indigo v0.0.0-20260318212431-cbaa83aee9dd
 	github.com/go-chi/chi/v5 v5.2.5
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/gookit/config/v2 v2.2.7
 	github.com/mazrean/kessoku v1.1.0
 	golang.org/x/net v0.52.0
@@ -13,16 +15,14 @@ require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/alecthomas/kong v1.13.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bluesky-social/indigo v0.0.0-20260318212431-cbaa83aee9dd // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/earthboundkid/versioninfo/v2 v2.24.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
-	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gookit/goutil v0.7.4 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
