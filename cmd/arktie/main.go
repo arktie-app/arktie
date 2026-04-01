@@ -34,7 +34,11 @@ func main() {
 		return
 	}
 
-	srv := newServer(cfg)
+	srv, err := newServer(cfg)
+	if err != nil {
+		slog.Error("failed to init http server", liblogs.ErrAttr(err))
+		return
+	}
 	slog.Info("starting http server", slog.String("addr", cfg.Server.Addr))
 
 	if err := srv.ListenAndServe(); err != nil {
