@@ -44,7 +44,7 @@ type ServerConfig struct {
 
 type SQLConfig struct {
 	Driver string `mapstructure:"driver" env:"SQL_DRIVER" default:"sqlite"`
-	DSN    string `mapstructure:"dsn" env:"SQL_DSN" default:"file:./arktie.sqlite?_fk=1"`
+	DSN    string `mapstructure:"dsn" env:"SQL_DSN" default:"file:./arktie.sqlite?_pragma=foreign_keys(1)"`
 }
 
 type RedisConfig struct {
