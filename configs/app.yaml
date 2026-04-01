@@ -1,0 +1,6 @@
+app:
+  url: "http://127.0.0.1:3000"
+  # openssl rand 32 -hex
+  key: "hex:ed864beb820c49438a995c3e158245da745eb0a9fbb0e951acad39efbf28d060"
+  # openssl rand 32 -base64
+  #key: "base64:IeJA9b3jwUITRas3LzdFuO6qEPtTxhTtEjK2qy++hqc="
