@@ -1,6 +1,7 @@
 package data
 
 import (
+	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 
@@ -47,8 +48,8 @@ func (c *Client) initSQLClient(cfg *Config) error {
 		return err
 	}
 
-	c.Ent = ent.NewClient(ent.Driver(entsql.OpenDB(cfg.Service.Database.SQL.Driver, db)))
-	return nil
+	c.Ent = ent.NewClient(ent.Driver(entsql.OpenDB(dialect.SQLite, db)))
+	return db.Ping()
 }
 
 func (c *Client) initRedisClient(cfg *Config) (err error) {
