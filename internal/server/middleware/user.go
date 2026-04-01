@@ -4,19 +4,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"arktie.org/internal/data"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/lib/libjwt"
+	"arktie.org/internal/lib/liblogs"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 )
 
 var (
-	errSesisonNotFound = errors.New("session not found in storage")
+	errSessionNotFound = errors.New("session not found in storage")
+	errInternal        = errors.New("internal server error")
 )
 
 type ctxKey struct{}
@@ -48,7 +51,12 @@ func RequireUser(cfg *data.Config, client *data.Client) func(http.Handler) http.
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			claim, err := authenticate(cfg, client.RDB, r)
 			if err != nil {
-				libhttp.WriteError(w, http.StatusUnauthorized, "invalid or missing token")
+				if errors.Is(err, errInternal) {
+					slog.ErrorContext(r.Context(), "internal server error", liblogs.ErrAttr(err))
+					libhttp.WriteError(w, http.StatusInternalServerError, "")
+				} else {
+					libhttp.WriteError(w, http.StatusUnauthorized, "invalid or missing token")
+				}
 				return
 			}
 
@@ -110,10 +118,10 @@ func authenticate(cfg *data.Config, rdb *redis.Client, r *http.Request) (*libjwt
 	sessionKey := fmt.Sprintf("oauth:session:%s/%s", claim.ATProto.Session.AccountDID, claim.ATProto.Session.SessionID)
 	n, err := rdb.Exists(r.Context(), sessionKey).Result()
 	if err != nil {
-		return nil, fmt.Errorf("session check failed: %w", err)
+		return nil, fmt.Errorf("%w: session check failed: %w", errInternal, err)
 	}
 	if n == 0 {
-		return nil, errSesisonNotFound
+		return nil, errSessionNotFound
 	}
 
 	return claim, nil
