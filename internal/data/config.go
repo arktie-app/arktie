@@ -42,9 +42,23 @@ type ServerConfig struct {
 	Addr string `mapstructure:"addr" env:"SERVER_ADDR" default:"8000"`
 }
 
+type RedisConfig struct {
+	Addr     string `mapstructure:"addr" env:"REDIS_ADDR"`
+	Password string `mapstructure:"pass" env:"REDIS_PASS"`
+}
+
+type DatabaseConfig struct {
+	Redis RedisConfig `mapstructure:"redis" default:""`
+}
+
+type ServiceConfig struct {
+	Database DatabaseConfig `mapstructure:"database" default:""`
+}
+
 type Config struct {
-	App    AppConfig    `default:""`
-	Server ServerConfig `default:""`
+	App     AppConfig     `mapstructure:"app" default:""`
+	Server  ServerConfig  `mapstructure:"server" default:""`
+	Service ServiceConfig `mapstructure:"service" default:""`
 }
 
 func NewConfig(name, version string, paths ...string) (*Config, error) {
