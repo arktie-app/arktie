@@ -38,6 +38,6 @@ func main() {
 	slog.Info("starting http server", slog.String("addr", cfg.Server.Addr))
 
 	if err := srv.ListenAndServe(); err != nil {
-		slog.Error("failed to listen and server", liblogs.ErrAttr(err))
+		slog.Error("failed to listen and serve", liblogs.ErrAttr(err))
 	}
 }

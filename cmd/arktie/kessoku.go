@@ -5,11 +5,12 @@ package main
 import (
 	"net/http"
 
-	"arktie.org/internal/data"
-	"arktie.org/internal/server"
 	"github.com/mazrean/kessoku"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
+
+	"arktie.org/internal/data"
+	"arktie.org/internal/server"
 )
 
 // newServer is the kessoku-generated DI initializer.

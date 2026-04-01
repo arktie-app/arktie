@@ -4,9 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io/fs"
-	"net"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -28,32 +26,15 @@ type AppConfig struct {
 }
 
 func (c AppConfig) IsLocal() bool {
-	u, err := url.ParseRequestURI(c.URLValue)
-	if err != nil {
-		// handle invalid URL format
+	if c.URL == nil {
 		return false
 	}
 
-	host := u.Host
-	// Remove port if present (e.g., "localhost:8080" becomes "localhost")
-	if strings.Contains(host, ":") {
-		h, _, err := net.SplitHostPort(host)
-		if err != nil {
-			// handle error in splitting host and port
-			return false
-		}
-		host = h
-	}
-
-	// Check if the hostname is a common loopback identifier
-	switch host {
+	switch c.URL.Hostname() {
 	case "localhost", "127.0.0.1", "::1", "":
-		// An empty host might indicate a file:/// style URL or similar, which is local
 		return true
 	}
 
-	// You can also check if the resolved IP is a loopback address
-	// This is more complex and usually not necessary if checking the hostname string
 	return false
 }
 
@@ -89,7 +70,8 @@ func NewConfig(name, version string, paths ...string) (*Config, error) {
 				return err
 			}
 
-			if !d.IsDir() {
+			ext := filepath.Ext(path)
+			if !d.IsDir() && (ext == ".yaml" || ext == ".yml") {
 				cfgPaths = append(cfgPaths, path)
 			}
 
@@ -135,14 +117,10 @@ func parseKey(value string) (ret []byte, err error) {
 	switch {
 	case strings.HasPrefix(value, "hex:"):
 		trimmed := strings.TrimPrefix(value, "hex:")
-		if ret, err = hex.DecodeString(trimmed); err != nil {
-			return nil, fmt.Errorf("failed to decode key from hex: %w", err)
-		}
+		return hex.DecodeString(trimmed)
 	case strings.HasPrefix(value, "base64:"):
 		trimmed := strings.TrimPrefix(value, "base64:")
-		if ret, err = base64.StdEncoding.DecodeString(trimmed); err != nil {
-			return nil, fmt.Errorf("failed to decode key from base64: %w", err)
-		}
+		return base64.StdEncoding.DecodeString(trimmed)
 	}
 
 	return []byte(value), nil
