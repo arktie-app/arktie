@@ -20,7 +20,7 @@ type OAuthHandler interface {
 
 var _ OAuthHandler = &oauth.Service{}
 
-func NewHandler(cfg *data.Config, oauth OAuthHandler) http.Handler {
+func NewHandler(cfg *data.Config, client *data.Client, oauth OAuthHandler) http.Handler {
 	mux := chi.NewMux()
 
 	mux.Group(func(r chi.Router) {
@@ -28,11 +28,11 @@ func NewHandler(cfg *data.Config, oauth OAuthHandler) http.Handler {
 		r.HandleFunc("GET /oauth/start", oauth.Start)
 		r.HandleFunc("GET /oauth/callback", oauth.Callback)
 
-		r.With(middleware.RequireUser(cfg)).
+		r.With(middleware.RequireUser(cfg, client)).
 			HandleFunc("POST /api/logout", oauth.Logout)
 	})
 
-	mux.With(middleware.RequireUser(cfg)).
+	mux.With(middleware.RequireUser(cfg, client)).
 		HandleFunc("GET /api/me", func(w http.ResponseWriter, r *http.Request) {
 			libhttp.WriteJSON(w, http.StatusOK, middleware.UserFromContext(r.Context()))
 		})

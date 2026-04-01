@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"arktie.org/internal/lib/libjwt"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type ctxKey struct{}
@@ -19,10 +21,10 @@ type ctxKey struct{}
 // claim in the request context.
 //
 // It does not block request even if user is not authenticated.
-func User(cfg *data.Config) func(http.Handler) http.Handler {
+func User(cfg *data.Config, client *data.Client) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if claim, err := authenticate(cfg, r); err == nil {
+			if claim, err := authenticate(cfg, client.RDB, r); err == nil {
 				ctx := context.WithValue(r.Context(), ctxKey{}, claim)
 				r = r.WithContext(ctx)
 			}
@@ -36,10 +38,10 @@ func User(cfg *data.Config) func(http.Handler) http.Handler {
 // claim in the request context.
 //
 // It bloks with response "401 Unauthorized" if user is not authenticated.
-func RequireUser(cfg *data.Config) func(http.Handler) http.Handler {
+func RequireUser(cfg *data.Config, client *data.Client) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			claim, err := authenticate(cfg, r)
+			claim, err := authenticate(cfg, client.RDB, r)
 			if err != nil {
 				libhttp.WriteError(w, http.StatusUnauthorized, "invalid or missing token")
 				return
@@ -74,7 +76,7 @@ func tokenFromCookie(r *http.Request) string {
 	return c.Value
 }
 
-func authenticate(cfg *data.Config, r *http.Request) (*libjwt.Claim, error) {
+func authenticate(cfg *data.Config, rdb *redis.Client, r *http.Request) (*libjwt.Claim, error) {
 	tokenString := tokenFromHeader(r)
 	if tokenString == "" {
 		tokenString = tokenFromCookie(r)
@@ -98,6 +100,15 @@ func authenticate(cfg *data.Config, r *http.Request) (*libjwt.Claim, error) {
 	}
 	if !token.Valid {
 		return nil, jwt.ErrTokenInvalidClaims
+	}
+
+	sessionKey := fmt.Sprintf("oauth:session:%s/%s", claim.ATProto.Session.AccountDID, claim.ATProto.Session.SessionID)
+	n, err := rdb.Exists(r.Context(), sessionKey).Result()
+	if err != nil {
+		return nil, fmt.Errorf("session check failed: %w", err)
+	}
+	if n == 0 {
+		return nil, fmt.Errorf("session not found in redis")
 	}
 
 	return claim, nil
