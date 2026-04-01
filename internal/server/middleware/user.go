@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,6 +13,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
+)
+
+var (
+	errSesisonNotFound = errors.New("session not found in storage")
 )
 
 type ctxKey struct{}
@@ -108,7 +113,7 @@ func authenticate(cfg *data.Config, rdb *redis.Client, r *http.Request) (*libjwt
 		return nil, fmt.Errorf("session check failed: %w", err)
 	}
 	if n == 0 {
-		return nil, fmt.Errorf("session not found in redis")
+		return nil, errSesisonNotFound
 	}
 
 	return claim, nil
