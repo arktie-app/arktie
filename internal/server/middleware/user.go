@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"arktie.org/internal/data"
+	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/lib/libjwt"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -34,9 +35,47 @@ func User(cfg *data.Config) func(http.Handler) http.Handler {
 			claim := &libjwt.Claim{}
 			token, err := jwt.ParseWithClaims(tokenString, claim, func(t *jwt.Token) (any, error) {
 				return cfg.App.Key, nil
-			})
+			},
+				jwt.WithValidMethods([]string{"HS256"}),
+				jwt.WithIssuer(cfg.App.URL.Hostname()),
+				jwt.WithAudience(cfg.App.URL.Hostname()),
+				jwt.WithExpirationRequired(),
+			)
 			if err != nil || !token.Valid {
 				next.ServeHTTP(w, r)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), ctxKey{}, claim)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func RequireUser(cfg *data.Config) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			tokenString := tokenFromHeader(r)
+			if tokenString == "" {
+				tokenString = tokenFromCookie(r)
+			}
+
+			if tokenString == "" {
+				libhttp.WriteError(w, http.StatusUnauthorized, "missing token")
+				return
+			}
+
+			claim := &libjwt.Claim{}
+			token, err := jwt.ParseWithClaims(tokenString, claim, func(t *jwt.Token) (any, error) {
+				return cfg.App.Key, nil
+			},
+				jwt.WithValidMethods([]string{"HS256"}),
+				jwt.WithIssuer(cfg.App.URL.Hostname()),
+				jwt.WithAudience(cfg.App.URL.Hostname()),
+				jwt.WithExpirationRequired(),
+			)
+			if err != nil || !token.Valid {
+				libhttp.WriteError(w, http.StatusUnauthorized, "invalid token")
 				return
 			}
 

@@ -3,6 +3,7 @@ package oauth
 import (
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -68,7 +69,7 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	atSession, err := svc.client.OAuth.ProcessCallback(r.Context(), r.URL.Query())
 	if err != nil {
 		slog.WarnContext(r.Context(), "failed to get OAuth callback", liblogs.ErrAttr(err))
-		http.Redirect(w, r, "/?error="+err.Error(), http.StatusFound)
+		http.Redirect(w, r, "/?error="+url.QueryEscape(err.Error()), http.StatusFound)
 		return
 	}
 
@@ -121,4 +122,6 @@ func (svc *Service) Logout(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Unix(0, 0),
 	})
+
+	w.WriteHeader(http.StatusNoContent)
 }

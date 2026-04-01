@@ -26,7 +26,7 @@ func (c *Client) initOAuthClientApp(cfg *Config) error {
 	} else {
 		clientConfig = oauth.NewPublicConfig(
 			cfg.App.URL.JoinPath("oauth/client-metadata.json").String(),
-			cfg.App.URL.JoinPath("/oauth/callback").String(),
+			cfg.App.URL.JoinPath("oauth/callback").String(),
 			scopes,
 		)
 	}
