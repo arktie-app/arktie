@@ -3,7 +3,6 @@ package oauth
 import (
 	"log/slog"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -65,7 +64,7 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	atSession, err := svc.client.OAuth.ProcessCallback(r.Context(), r.URL.Query())
 	if err != nil {
 		slog.WarnContext(r.Context(), "failed to get OAuth callback", liblogs.ErrAttr(err))
-		http.Redirect(w, r, "/?error="+url.QueryEscape(err.Error()), http.StatusFound)
+		http.Redirect(w, r, "/?error=process_callback_failed", http.StatusFound)
 		return
 	}
 
@@ -84,7 +83,7 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	tokenString, err := token.SignedString(svc.cfg.App.Key)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "failed to sign JWT", liblogs.ErrAttr(err))
-		http.Redirect(w, r, "/?error=internal", http.StatusFound)
+		http.Redirect(w, r, "/?error=sign_jwt_failed", http.StatusFound)
 		return
 	}
 
