@@ -116,7 +116,7 @@ func (svc *Service) Logout(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   !svc.cfg.App.IsLocal(),
 		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
 	})
 
 	w.WriteHeader(http.StatusNoContent)
