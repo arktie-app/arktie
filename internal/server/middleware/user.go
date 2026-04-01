@@ -14,8 +14,6 @@ import (
 
 type ctxKey struct{}
 
-const sessionCookieName = "arktie_cookie"
-
 // User is a chi middleware that extracts a JWT from the Authorization header
 // (Bearer token) or the session cookie, validates it, and stores the parsed
 // claim in the request context.
@@ -101,7 +99,7 @@ func tokenFromHeader(r *http.Request) string {
 }
 
 func tokenFromCookie(r *http.Request) string {
-	c, err := r.Cookie(sessionCookieName)
+	c, err := r.Cookie(data.SessionCookieName)
 	if err != nil {
 		return ""
 	}

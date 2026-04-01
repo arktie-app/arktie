@@ -17,10 +17,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const (
-	sessionCookieName = "arktie_cookie"
-)
-
 type Service struct {
 	cfg    *data.Config
 	client *data.Client
@@ -93,7 +89,7 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     sessionCookieName,
+		Name:     data.SessionCookieName,
 		Value:    tokenString,
 		Path:     "/",
 		HttpOnly: true,
@@ -115,7 +111,7 @@ func (svc *Service) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     sessionCookieName,
+		Name:     data.SessionCookieName,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   !svc.cfg.App.IsLocal(),
