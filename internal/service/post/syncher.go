@@ -83,8 +83,15 @@ func (svc *Service) Update(msg *message.Message) error {
 		Record:     p.ToPDSRecord(),
 	}
 
-	if err := apiClient.Post(msg.Context(), "com.atproto.repo.putRecord", input, nil); err != nil {
+	var out agnostic.RepoPutRecord_Output
+	if err := apiClient.Post(msg.Context(), "com.atproto.repo.putRecord", input, &out); err != nil {
 		return fmt.Errorf("failed to update record on PDS: %w", err)
+	}
+
+	if out.Uri != "" {
+		if err := svc.client.Ent.Post.UpdateOneID(p.ID).SetAtURL(out.Uri).Exec(msg.Context()); err != nil {
+			slog.Error("failed to update post at_url", liblogs.ErrAttr(err), slog.String("post_id", p.ID.String()), slog.String("at_url", out.Uri))
+		}
 	}
 
 	return nil
