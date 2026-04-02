@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"testing/synctest"
+	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -59,27 +61,35 @@ func TestAttempt_CreateNewUser(t *testing.T) {
 }
 
 func TestAttempt_ReturnExistingUser(t *testing.T) {
-	uc := setupUsecase(t)
-	ctx := context.Background()
+	synctest.Test(t, func(t *testing.T) {
+		uc := setupUsecase(t)
+		ctx := context.Background()
 
-	did := syntax.DID("did:plc:test456")
-	session := &oauth.ClientSessionData{
-		AccountDID: did,
-	}
+		did := syntax.DID("did:plc:test456")
+		session := &oauth.ClientSessionData{
+			AccountDID: did,
+		}
 
-	first, err := uc.Attempt(ctx, session, nil)
-	if err != nil {
-		t.Fatalf("first attempt: expected no error, got %v", err)
-	}
+		first, err := uc.Attempt(ctx, session, nil)
+		if err != nil {
+			t.Fatalf("first attempt: expected no error, got %v", err)
+		}
 
-	second, err := uc.Attempt(ctx, session, nil)
-	if err != nil {
-		t.Fatalf("second attempt: expected no error, got %v", err)
-	}
+		time.Sleep(time.Second)
 
-	if first.ID != second.ID {
-		t.Errorf("expected same user ID, got %s and %s", first.ID, second.ID)
-	}
+		second, err := uc.Attempt(ctx, session, nil)
+		if err != nil {
+			t.Fatalf("second attempt: expected no error, got %v", err)
+		}
+
+		if first.ID != second.ID {
+			t.Errorf("expected same user ID, got %s and %s", first.ID, second.ID)
+		}
+
+		if !second.LastActiveAt.After(first.LastActiveAt) {
+			t.Errorf("expected last_active_at to be updated, first=%v second=%v", first.LastActiveAt, second.LastActiveAt)
+		}
+	})
 }
 
 func TestAttempt_DifferentDIDsCreateDifferentUsers(t *testing.T) {

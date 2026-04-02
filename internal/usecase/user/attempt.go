@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"crypto/rand"
+	"time"
 
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/bluesky-social/indigo/atproto/identity"
@@ -31,9 +32,16 @@ func (uc *Usecase) Attempt(ctx context.Context, session *oauth.ClientSessionData
 		return nil, err
 	}
 
-	return uc.client.Ent.User.Query().
+	u, err = uc.client.Ent.User.Query().
 		Where(user.AccountDid(session.AccountDID.String())).
 		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.Update().
+		SetLastActiveAt(time.Now()).
+		Save(ctx)
 }
 
 func makeEncryptionKey() ([]byte, error) {
