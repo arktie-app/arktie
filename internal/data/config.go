@@ -17,6 +17,7 @@ import (
 type AppConfig struct {
 	Name    string `default:"arktie"`
 	Version string `default:"0.0.0"`
+	Debug   bool   `mapstructure:"debug" env:"APP_DEBUG"`
 
 	URL      *url.URL `mapstructure:"-"`
 	URLValue string   `mapstructure:"url" env:"APP_URL"`

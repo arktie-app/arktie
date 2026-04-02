@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log/slog"
 	"os"
@@ -34,14 +35,13 @@ func main() {
 		return
 	}
 
-	srv, err := newServer(cfg)
+	app, err := newApp(cfg)
 	if err != nil {
-		slog.Error("failed to init http server", liblogs.ErrAttr(err))
+		slog.Error("failed to init app", liblogs.ErrAttr(err))
 		return
 	}
-	slog.Info("starting http server", slog.String("addr", cfg.Server.Addr))
 
-	if err := srv.ListenAndServe(); err != nil {
-		slog.Error("failed to listen and serve", liblogs.ErrAttr(err))
+	if err := app.Run(context.Background()); err != nil {
+		slog.Error("app stopped", liblogs.ErrAttr(err))
 	}
 }

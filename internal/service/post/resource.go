@@ -2,7 +2,9 @@ package post
 
 import (
 	"context"
+	"encoding/json"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -27,6 +29,11 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 	p, err := svc.resource.Create(ctx, userID, req.MarkdownContent)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create post")
+	}
+
+	if payload, err := json.Marshal(p); err == nil {
+		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
+		svc.client.Publisher.Publish("post.created", msg)
 	}
 
 	return &postv1.CreatePostResponse{Post: p.ToProto()}, nil

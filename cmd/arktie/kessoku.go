@@ -22,8 +22,8 @@ import (
 // Output:  *server.Server	(fully wired HTTP server)
 //
 //nolint:unused
-var _ = kessoku.Inject[*http.Server](
-	"newServer",
+var _ = kessoku.Inject[*App](
+	"newApp",
 	kessoku.Provide(data.NewClient),
 
 	// usecase
@@ -44,15 +44,24 @@ var _ = kessoku.Inject[*http.Server](
 		kessoku.Provide(func(s *oauth.Service) server.OAuthHandler { return s }),
 	),
 	kessoku.Provide(post.NewService),
+	kessoku.Bind[server.PostSyncher](
+		kessoku.Provide(func(s *post.Service) server.PostSyncher { return s }),
+	),
 
 	// handlers
 	kessoku.Provide(server.NewHandler),
 
-	// server
-	kessoku.Provide(func(cfg *data.Config, handler http.Handler) *http.Server {
-		return &http.Server{
-			Addr:    cfg.Server.Addr,
-			Handler: h2c.NewHandler(handler, &http2.Server{}),
+	// listeners
+	kessoku.Provide(server.NewListener),
+
+	// app
+	kessoku.Provide(func(cfg *data.Config, client *data.Client, handler http.Handler, _ *server.Listener) *App {
+		return &App{
+			HTTP: &http.Server{
+				Addr:    cfg.Server.Addr,
+				Handler: h2c.NewHandler(handler, &http2.Server{}),
+			},
+			Router: client.Router,
 		}
 	}),
 )

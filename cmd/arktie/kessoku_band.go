@@ -15,11 +15,11 @@ import (
 	"net/http"
 )
 
-func newServer(config *data.Config) (*http.Server, error) {
+func newApp(config *data.Config) (*App, error) {
 	var err error
 	client, err := kessoku.Provide(data.NewClient).Fn()(config)
 	if err != nil {
-		var zero *http.Server
+		var zero *App
 		return zero, err
 	}
 	usecase := kessoku.Provide(post0.NewUsecase).Fn()(client)
@@ -30,14 +30,18 @@ func newServer(config *data.Config) (*http.Server, error) {
 	userAttempter := kessoku.Bind[oauth.UserAttempter](kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter {
 		return uc
 	})).Fn()(usecase0)
-	service := kessoku.Provide(post.NewService).Fn()(postResource)
+	service := kessoku.Provide(post.NewService).Fn()(postResource, client)
 	service0 := kessoku.Provide(oauth.NewService).Fn()(config, client, userAttempter)
+	postSyncher := kessoku.Bind[server.PostSyncher](kessoku.Provide(func(s *post.Service) server.PostSyncher {
+		return s
+	})).Fn()(service)
 	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
 		return s
 	})).Fn()(service0)
+	listener := kessoku.Provide(server.NewListener).Fn()(client, postSyncher)
 	handler := kessoku.Provide(server.NewHandler).Fn()(config, client, oauthHandler, service)
-	server0 := kessoku.Provide(func(cfg *data.Config, handler http.Handler) *http.Server {
-		return &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}
-	}).Fn()(config, handler)
-	return server0, nil
+	app := kessoku.Provide(func(cfg *data.Config, client *data.Client, handler http.Handler, _ *server.Listener) *App {
+		return &App{HTTP: &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}, Router: client.Router}
+	}).Fn()(config, client, handler, listener)
+	return app, nil
 }

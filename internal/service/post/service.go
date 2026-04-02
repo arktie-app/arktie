@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"arktie.org/ent"
+	"arktie.org/internal/data"
 	postv1 "arktie.org/internal/pb/post/v1"
 	ucpost "arktie.org/internal/usecase/post"
 )
@@ -14,11 +15,13 @@ type Service struct {
 	postv1.UnimplementedPostServiceServer
 
 	resource PostResource
+	client   *data.Client
 }
 
-func NewService(resource PostResource) *Service {
+func NewService(resource PostResource, client *data.Client) *Service {
 	return &Service{
 		resource: resource,
+		client:   client,
 	}
 }
 
