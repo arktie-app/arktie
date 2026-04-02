@@ -29,7 +29,7 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 		return nil, status.Error(codes.Internal, "failed to create post")
 	}
 
-	return &postv1.CreatePostResponse{Post: entPostToProto(p)}, nil
+	return &postv1.CreatePostResponse{Post: p.ToProto()}, nil
 }
 
 func (svc *Service) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*postv1.GetPostResponse, error) {
@@ -46,7 +46,7 @@ func (svc *Service) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*p
 		return nil, status.Error(codes.Internal, "failed to get post")
 	}
 
-	return &postv1.GetPostResponse{Post: entPostToProto(p)}, nil
+	return &postv1.GetPostResponse{Post: p.ToProto()}, nil
 }
 
 func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostRequest) (*postv1.UpdatePostResponse, error) {
@@ -76,7 +76,7 @@ func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostReques
 		return nil, status.Error(codes.Internal, "failed to update post")
 	}
 
-	return &postv1.UpdatePostResponse{Post: entPostToProto(updated)}, nil
+	return &postv1.UpdatePostResponse{Post: updated.ToProto()}, nil
 }
 
 func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostRequest) (*postv1.DeletePostResponse, error) {
@@ -103,22 +103,4 @@ func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostReques
 	}
 
 	return &postv1.DeletePostResponse{}, nil
-}
-
-func entPostToProto(p *ent.Post) *postv1.Post {
-	pb := &postv1.Post{
-		Id:        p.ID.String(),
-		UserId:    p.UserID.String(),
-		CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt: p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-	}
-
-	if p.AtURL != nil {
-		pb.AtUrl = *p.AtURL
-	}
-	if p.MarkdownContent != nil {
-		pb.MarkdownContent = p.MarkdownContent
-	}
-
-	return pb
 }
