@@ -66,6 +66,8 @@ description: 遵循 Uber 與 Google Go 風格指南編寫地道 (idiomatic) 且�
 
 - **Functional Options**：對於具有多個可選配置的構造函數，優先使用 Functional Options 模式。
 - **表格驅動測試 (Table-driven Tests)**：使用子測試 (`t.Run`) 編寫簡潔且覆蓋面廣的測試案例。
+- **標準測試工具**：在情況允許的前提下不應該使用外部測試套件（例如 `testify`），優先使用標準庫 `testing` 提供的功能。
+- **時間與併發測試隔離**：測試與時間或 goroutine 相關的功能時，應該使用 `testing/synctest` 進行隔離，避免依賴真實的 `time.Sleep` 或非確定性的時序。
 - **工具鏈**：
     - 必須通過 `gofmt` 格式化。
     - 使用 `go vet` 和 `staticcheck` (或 `golangci-lint`) 檢查潛在問題。

@@ -6,6 +6,7 @@ import (
 	"arktie.org/internal/data"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/oauth"
+	"arktie.org/internal/usecase/user"
 	"github.com/mazrean/kessoku"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -19,11 +20,15 @@ func newServer(config *data.Config) (*http.Server, error) {
 		var zero *http.Server
 		return zero, err
 	}
-	service := kessoku.Provide(oauth.NewService).Fn()(config, client)
+	usecase := kessoku.Provide(user.NewUsecase).Fn()(client)
+	userAttempter := kessoku.Bind[oauth.UserAttempter](kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter {
+		return uc
+	})).Fn()(usecase)
+	service := kessoku.Provide(oauth.NewService).Fn()(config, client, userAttempter)
 	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
 		return s
 	})).Fn()(service)
-	handler := kessoku.Provide(server.NewHandler).Fn()(config, oauthHandler)
+	handler := kessoku.Provide(server.NewHandler).Fn()(config, client, oauthHandler)
 	server0 := kessoku.Provide(func(cfg *data.Config, handler http.Handler) *http.Server {
 		return &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}
 	}).Fn()(config, handler)

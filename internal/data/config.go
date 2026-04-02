@@ -42,12 +42,18 @@ type ServerConfig struct {
 	Addr string `mapstructure:"addr" env:"SERVER_ADDR" default:"8000"`
 }
 
+type SQLConfig struct {
+	Driver string `mapstructure:"driver" env:"SQL_DRIVER" default:"sqlite"`
+	DSN    string `mapstructure:"dsn" env:"SQL_DSN" default:"file:./arktie.sqlite?_pragma=foreign_keys(1)"`
+}
+
 type RedisConfig struct {
 	Addr     string `mapstructure:"addr" env:"REDIS_ADDR"`
 	Password string `mapstructure:"pass" env:"REDIS_PASS"`
 }
 
 type DatabaseConfig struct {
+	SQL   SQLConfig   `mapstructure:"sql" default:""`
 	Redis RedisConfig `mapstructure:"redis" default:""`
 }
 

@@ -1,20 +1,32 @@
 package data
 
 import (
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
+
+	"github.com/XSAM/otelsql"
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	_ "modernc.org/sqlite"
 
+	"arktie.org/ent"
 	"arktie.org/pkg/atproto"
 )
 
 type Client struct {
+	Ent   *ent.Client
 	RDB   *redis.Client
 	OAuth *oauth.ClientApp
 }
 
 func NewClient(cfg *Config) (client *Client, err error) {
 	client = &Client{}
+
+	if err = client.initSQLClient(cfg); err != nil {
+		return
+	}
 
 	if err = client.initRedisClient(cfg); err != nil {
 		return
@@ -25,6 +37,19 @@ func NewClient(cfg *Config) (client *Client, err error) {
 	}
 
 	return
+}
+
+func (c *Client) initSQLClient(cfg *Config) error {
+	db, err := otelsql.Open(
+		cfg.Service.Database.SQL.Driver, cfg.Service.Database.SQL.DSN,
+		otelsql.WithAttributes(semconv.DBSystemNameKey.String(cfg.Service.Database.SQL.Driver)),
+	)
+	if err != nil {
+		return err
+	}
+
+	c.Ent = ent.NewClient(ent.Driver(entsql.OpenDB(dialect.SQLite, db)))
+	return db.Ping()
 }
 
 func (c *Client) initRedisClient(cfg *Config) (err error) {

@@ -1,5 +1,8 @@
 service:
   database:
+    sql:
+      driver: sqlite
+      dsn: ./arktie.sqlite?_pragma=foreign_keys(1)
     redis:
       addr: "localhost:6379"
       password:

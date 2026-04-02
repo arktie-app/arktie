@@ -1,0 +1,55 @@
+package user
+
+import (
+	"context"
+	"crypto/rand"
+	"time"
+
+	"github.com/bluesky-social/indigo/atproto/auth/oauth"
+	"github.com/bluesky-social/indigo/atproto/identity"
+
+	"arktie.org/ent"
+	"arktie.org/ent/user"
+)
+
+func (uc *Usecase) Attempt(ctx context.Context, session *oauth.ClientSessionData, identity *identity.Identity) (*ent.User, error) {
+	key, err := makeEncryptionKey()
+	if err != nil {
+		return nil, err
+	}
+
+	// Try to create the user first. If the account_did already exists
+	// (unique constraint violation), fall back to a query.
+	u, err := uc.client.Ent.User.Create().
+		SetAccountDid(session.AccountDID.String()).
+		SetEncryptionKey(key).
+		Save(ctx)
+	if err == nil {
+		return u, nil
+	}
+
+	if !ent.IsConstraintError(err) {
+		return nil, err
+	}
+
+	u, err = uc.client.Ent.User.Query().
+		Where(user.AccountDid(session.AccountDID.String())).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return u.Update().
+		SetLastActiveAt(time.Now()).
+		Save(ctx)
+}
+
+func makeEncryptionKey() ([]byte, error) {
+	key := make([]byte, 32) // For AES-256, it needs 32 bytes key
+
+	if _, err := rand.Read(key); err != nil {
+		return nil, err
+	}
+
+	return key, nil
+}

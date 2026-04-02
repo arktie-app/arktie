@@ -50,13 +50,25 @@ The project uses [kessoku](https://github.com/mazrean/kessoku) for compile-time 
 - App key (`app.key`) must be prefixed with `hex:` or `base64:` to indicate encoding format
 - `Name` and `Version` are injected via `-ldflags` at build time, overriding config defaults
 
+### ORM with Ent
+
+- [ent](https://entgo.io/) is used for database schema, migrations, and queries
+- Schema definitions live in `ent/schema/`
+- Generated code is in `ent/` (auto-generated, do not edit except `ent/schema/`)
+- Running `go generate ./ent` regenerates the ent client code
+- Migrations are applied via `arktie-cli migrate` (uses `ent.Schema.Create` auto-migration)
+
 ### Project Layout
 
 ```
 cmd/arktie/       # Application entrypoint and DI wiring
-internal/data/    # Configuration and data types
-internal/server/  # HTTP handler and routing
-internal/lib/     # Shared utilities (libhttp, liblogs)
+cmd/cli/          # CLI tools (migrate, etc.)
+internal/data/    # Configuration, database client
+internal/server/  # HTTP handler, routing, middleware
+internal/service/ # Service layer (oauth, etc.)
+internal/usecase/ # Business logic / use cases
+internal/lib/     # Shared utilities (libhttp, libjwt, liblogs, liberrs)
+ent/              # Ent ORM (generated code + schema/)
 configs/          # YAML configuration files
 ```
 
