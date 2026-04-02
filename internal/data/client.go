@@ -64,7 +64,7 @@ func (c *Client) initRedisClient(cfg *Config) (err error) {
 func (c *Client) initOAuthClientApp(cfg *Config) error {
 	scopes := []string{
 		"atproto",
-		// "repo:app.arktie?action=create"
+		"repo:app.arktie.post",
 	}
 
 	var clientConfig oauth.ClientConfig
