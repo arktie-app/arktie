@@ -60,14 +60,14 @@ func UserID(v uuid.UUID) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldUserID, v))
 }
 
-// AtURL applies equality check predicate on the "at_url" field. It's identical to AtURLEQ.
-func AtURL(v string) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldAtURL, v))
-}
-
 // MarkdownContent applies equality check predicate on the "markdown_content" field. It's identical to MarkdownContentEQ.
 func MarkdownContent(v string) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldMarkdownContent, v))
+}
+
+// AtURL applies equality check predicate on the "at_url" field. It's identical to AtURLEQ.
+func AtURL(v string) predicate.Post {
+	return predicate.Post(sql.FieldEQ(FieldAtURL, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -118,71 +118,6 @@ func UserIDLT(v uuid.UUID) predicate.Post {
 // UserIDLTE applies the LTE predicate on the "user_id" field.
 func UserIDLTE(v uuid.UUID) predicate.Post {
 	return predicate.Post(sql.FieldLTE(FieldUserID, v))
-}
-
-// AtURLEQ applies the EQ predicate on the "at_url" field.
-func AtURLEQ(v string) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldAtURL, v))
-}
-
-// AtURLNEQ applies the NEQ predicate on the "at_url" field.
-func AtURLNEQ(v string) predicate.Post {
-	return predicate.Post(sql.FieldNEQ(FieldAtURL, v))
-}
-
-// AtURLIn applies the In predicate on the "at_url" field.
-func AtURLIn(vs ...string) predicate.Post {
-	return predicate.Post(sql.FieldIn(FieldAtURL, vs...))
-}
-
-// AtURLNotIn applies the NotIn predicate on the "at_url" field.
-func AtURLNotIn(vs ...string) predicate.Post {
-	return predicate.Post(sql.FieldNotIn(FieldAtURL, vs...))
-}
-
-// AtURLGT applies the GT predicate on the "at_url" field.
-func AtURLGT(v string) predicate.Post {
-	return predicate.Post(sql.FieldGT(FieldAtURL, v))
-}
-
-// AtURLGTE applies the GTE predicate on the "at_url" field.
-func AtURLGTE(v string) predicate.Post {
-	return predicate.Post(sql.FieldGTE(FieldAtURL, v))
-}
-
-// AtURLLT applies the LT predicate on the "at_url" field.
-func AtURLLT(v string) predicate.Post {
-	return predicate.Post(sql.FieldLT(FieldAtURL, v))
-}
-
-// AtURLLTE applies the LTE predicate on the "at_url" field.
-func AtURLLTE(v string) predicate.Post {
-	return predicate.Post(sql.FieldLTE(FieldAtURL, v))
-}
-
-// AtURLContains applies the Contains predicate on the "at_url" field.
-func AtURLContains(v string) predicate.Post {
-	return predicate.Post(sql.FieldContains(FieldAtURL, v))
-}
-
-// AtURLHasPrefix applies the HasPrefix predicate on the "at_url" field.
-func AtURLHasPrefix(v string) predicate.Post {
-	return predicate.Post(sql.FieldHasPrefix(FieldAtURL, v))
-}
-
-// AtURLHasSuffix applies the HasSuffix predicate on the "at_url" field.
-func AtURLHasSuffix(v string) predicate.Post {
-	return predicate.Post(sql.FieldHasSuffix(FieldAtURL, v))
-}
-
-// AtURLEqualFold applies the EqualFold predicate on the "at_url" field.
-func AtURLEqualFold(v string) predicate.Post {
-	return predicate.Post(sql.FieldEqualFold(FieldAtURL, v))
-}
-
-// AtURLContainsFold applies the ContainsFold predicate on the "at_url" field.
-func AtURLContainsFold(v string) predicate.Post {
-	return predicate.Post(sql.FieldContainsFold(FieldAtURL, v))
 }
 
 // MarkdownContentEQ applies the EQ predicate on the "markdown_content" field.
@@ -248,6 +183,81 @@ func MarkdownContentEqualFold(v string) predicate.Post {
 // MarkdownContentContainsFold applies the ContainsFold predicate on the "markdown_content" field.
 func MarkdownContentContainsFold(v string) predicate.Post {
 	return predicate.Post(sql.FieldContainsFold(FieldMarkdownContent, v))
+}
+
+// AtURLEQ applies the EQ predicate on the "at_url" field.
+func AtURLEQ(v string) predicate.Post {
+	return predicate.Post(sql.FieldEQ(FieldAtURL, v))
+}
+
+// AtURLNEQ applies the NEQ predicate on the "at_url" field.
+func AtURLNEQ(v string) predicate.Post {
+	return predicate.Post(sql.FieldNEQ(FieldAtURL, v))
+}
+
+// AtURLIn applies the In predicate on the "at_url" field.
+func AtURLIn(vs ...string) predicate.Post {
+	return predicate.Post(sql.FieldIn(FieldAtURL, vs...))
+}
+
+// AtURLNotIn applies the NotIn predicate on the "at_url" field.
+func AtURLNotIn(vs ...string) predicate.Post {
+	return predicate.Post(sql.FieldNotIn(FieldAtURL, vs...))
+}
+
+// AtURLGT applies the GT predicate on the "at_url" field.
+func AtURLGT(v string) predicate.Post {
+	return predicate.Post(sql.FieldGT(FieldAtURL, v))
+}
+
+// AtURLGTE applies the GTE predicate on the "at_url" field.
+func AtURLGTE(v string) predicate.Post {
+	return predicate.Post(sql.FieldGTE(FieldAtURL, v))
+}
+
+// AtURLLT applies the LT predicate on the "at_url" field.
+func AtURLLT(v string) predicate.Post {
+	return predicate.Post(sql.FieldLT(FieldAtURL, v))
+}
+
+// AtURLLTE applies the LTE predicate on the "at_url" field.
+func AtURLLTE(v string) predicate.Post {
+	return predicate.Post(sql.FieldLTE(FieldAtURL, v))
+}
+
+// AtURLContains applies the Contains predicate on the "at_url" field.
+func AtURLContains(v string) predicate.Post {
+	return predicate.Post(sql.FieldContains(FieldAtURL, v))
+}
+
+// AtURLHasPrefix applies the HasPrefix predicate on the "at_url" field.
+func AtURLHasPrefix(v string) predicate.Post {
+	return predicate.Post(sql.FieldHasPrefix(FieldAtURL, v))
+}
+
+// AtURLHasSuffix applies the HasSuffix predicate on the "at_url" field.
+func AtURLHasSuffix(v string) predicate.Post {
+	return predicate.Post(sql.FieldHasSuffix(FieldAtURL, v))
+}
+
+// AtURLIsNil applies the IsNil predicate on the "at_url" field.
+func AtURLIsNil() predicate.Post {
+	return predicate.Post(sql.FieldIsNull(FieldAtURL))
+}
+
+// AtURLNotNil applies the NotNil predicate on the "at_url" field.
+func AtURLNotNil() predicate.Post {
+	return predicate.Post(sql.FieldNotNull(FieldAtURL))
+}
+
+// AtURLEqualFold applies the EqualFold predicate on the "at_url" field.
+func AtURLEqualFold(v string) predicate.Post {
+	return predicate.Post(sql.FieldEqualFold(FieldAtURL, v))
+}
+
+// AtURLContainsFold applies the ContainsFold predicate on the "at_url" field.
+func AtURLContainsFold(v string) predicate.Post {
+	return predicate.Post(sql.FieldContainsFold(FieldAtURL, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

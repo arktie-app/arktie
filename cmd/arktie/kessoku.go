@@ -12,6 +12,8 @@ import (
 	"arktie.org/internal/data"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/oauth"
+	"arktie.org/internal/service/post"
+	ucpost "arktie.org/internal/usecase/post"
 	"arktie.org/internal/usecase/user"
 )
 
@@ -30,11 +32,18 @@ var _ = kessoku.Inject[*http.Server](
 		kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter { return uc }),
 	),
 
+	// usecase - post
+	kessoku.Provide(ucpost.NewUsecase),
+	kessoku.Bind[post.PostResource](
+		kessoku.Provide(func(uc *ucpost.Usecase) post.PostResource { return uc }),
+	),
+
 	// services
 	kessoku.Provide(oauth.NewService),
 	kessoku.Bind[server.OAuthHandler](
 		kessoku.Provide(func(s *oauth.Service) server.OAuthHandler { return s }),
 	),
+	kessoku.Provide(post.NewService),
 
 	// handlers
 	kessoku.Provide(server.NewHandler),

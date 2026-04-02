@@ -43,6 +43,20 @@ func (_u *PostUpdate) SetNillableUserID(v *uuid.UUID) *PostUpdate {
 	return _u
 }
 
+// SetMarkdownContent sets the "markdown_content" field.
+func (_u *PostUpdate) SetMarkdownContent(v string) *PostUpdate {
+	_u.mutation.SetMarkdownContent(v)
+	return _u
+}
+
+// SetNillableMarkdownContent sets the "markdown_content" field if the given value is not nil.
+func (_u *PostUpdate) SetNillableMarkdownContent(v *string) *PostUpdate {
+	if v != nil {
+		_u.SetMarkdownContent(*v)
+	}
+	return _u
+}
+
 // SetAtURL sets the "at_url" field.
 func (_u *PostUpdate) SetAtURL(v string) *PostUpdate {
 	_u.mutation.SetAtURL(v)
@@ -57,17 +71,9 @@ func (_u *PostUpdate) SetNillableAtURL(v *string) *PostUpdate {
 	return _u
 }
 
-// SetMarkdownContent sets the "markdown_content" field.
-func (_u *PostUpdate) SetMarkdownContent(v string) *PostUpdate {
-	_u.mutation.SetMarkdownContent(v)
-	return _u
-}
-
-// SetNillableMarkdownContent sets the "markdown_content" field if the given value is not nil.
-func (_u *PostUpdate) SetNillableMarkdownContent(v *string) *PostUpdate {
-	if v != nil {
-		_u.SetMarkdownContent(*v)
-	}
+// ClearAtURL clears the value of the "at_url" field.
+func (_u *PostUpdate) ClearAtURL() *PostUpdate {
+	_u.mutation.ClearAtURL()
 	return _u
 }
 
@@ -130,11 +136,14 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(post.FieldUserID, field.TypeUUID, value)
 	}
+	if value, ok := _u.mutation.MarkdownContent(); ok {
+		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.AtURL(); ok {
 		_spec.SetField(post.FieldAtURL, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MarkdownContent(); ok {
-		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
+	if _u.mutation.AtURLCleared() {
+		_spec.ClearField(post.FieldAtURL, field.TypeString)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
@@ -173,6 +182,20 @@ func (_u *PostUpdateOne) SetNillableUserID(v *uuid.UUID) *PostUpdateOne {
 	return _u
 }
 
+// SetMarkdownContent sets the "markdown_content" field.
+func (_u *PostUpdateOne) SetMarkdownContent(v string) *PostUpdateOne {
+	_u.mutation.SetMarkdownContent(v)
+	return _u
+}
+
+// SetNillableMarkdownContent sets the "markdown_content" field if the given value is not nil.
+func (_u *PostUpdateOne) SetNillableMarkdownContent(v *string) *PostUpdateOne {
+	if v != nil {
+		_u.SetMarkdownContent(*v)
+	}
+	return _u
+}
+
 // SetAtURL sets the "at_url" field.
 func (_u *PostUpdateOne) SetAtURL(v string) *PostUpdateOne {
 	_u.mutation.SetAtURL(v)
@@ -187,17 +210,9 @@ func (_u *PostUpdateOne) SetNillableAtURL(v *string) *PostUpdateOne {
 	return _u
 }
 
-// SetMarkdownContent sets the "markdown_content" field.
-func (_u *PostUpdateOne) SetMarkdownContent(v string) *PostUpdateOne {
-	_u.mutation.SetMarkdownContent(v)
-	return _u
-}
-
-// SetNillableMarkdownContent sets the "markdown_content" field if the given value is not nil.
-func (_u *PostUpdateOne) SetNillableMarkdownContent(v *string) *PostUpdateOne {
-	if v != nil {
-		_u.SetMarkdownContent(*v)
-	}
+// ClearAtURL clears the value of the "at_url" field.
+func (_u *PostUpdateOne) ClearAtURL() *PostUpdateOne {
+	_u.mutation.ClearAtURL()
 	return _u
 }
 
@@ -290,11 +305,14 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	if value, ok := _u.mutation.UserID(); ok {
 		_spec.SetField(post.FieldUserID, field.TypeUUID, value)
 	}
+	if value, ok := _u.mutation.MarkdownContent(); ok {
+		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.AtURL(); ok {
 		_spec.SetField(post.FieldAtURL, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MarkdownContent(); ok {
-		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
+	if _u.mutation.AtURLCleared() {
+		_spec.ClearField(post.FieldAtURL, field.TypeString)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)

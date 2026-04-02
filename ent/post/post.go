@@ -16,10 +16,10 @@ const (
 	FieldID = "id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldAtURL holds the string denoting the at_url field in the database.
-	FieldAtURL = "at_url"
 	// FieldMarkdownContent holds the string denoting the markdown_content field in the database.
 	FieldMarkdownContent = "markdown_content"
+	// FieldAtURL holds the string denoting the at_url field in the database.
+	FieldAtURL = "at_url"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -32,8 +32,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUserID,
-	FieldAtURL,
 	FieldMarkdownContent,
+	FieldAtURL,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -72,14 +72,14 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByAtURL orders the results by the at_url field.
-func ByAtURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAtURL, opts...).ToFunc()
-}
-
 // ByMarkdownContent orders the results by the markdown_content field.
 func ByMarkdownContent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMarkdownContent, opts...).ToFunc()
+}
+
+// ByAtURL orders the results by the at_url field.
+func ByAtURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAtURL, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

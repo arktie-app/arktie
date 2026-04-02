@@ -12,8 +12,8 @@ var (
 	PostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "at_url", Type: field.TypeString},
 		{Name: "markdown_content", Type: field.TypeString},
+		{Name: "at_url", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}

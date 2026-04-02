@@ -20,10 +20,10 @@ type Post struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uuid.UUID `json:"user_id,omitempty"`
-	// AtURL holds the value of the "at_url" field.
-	AtURL string `json:"at_url,omitempty"`
 	// MarkdownContent holds the value of the "markdown_content" field.
 	MarkdownContent *string `json:"markdown_content,omitempty"`
+	// AtURL holds the value of the "at_url" field.
+	AtURL *string `json:"at_url,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -36,7 +36,7 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case post.FieldAtURL, post.FieldMarkdownContent:
+		case post.FieldMarkdownContent, post.FieldAtURL:
 			values[i] = new(sql.NullString)
 		case post.FieldCreatedAt, post.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -69,18 +69,19 @@ func (_m *Post) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.UserID = *value
 			}
-		case post.FieldAtURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field at_url", values[i])
-			} else if value.Valid {
-				_m.AtURL = value.String
-			}
 		case post.FieldMarkdownContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field markdown_content", values[i])
 			} else if value.Valid {
 				_m.MarkdownContent = new(string)
 				*_m.MarkdownContent = value.String
+			}
+		case post.FieldAtURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field at_url", values[i])
+			} else if value.Valid {
+				_m.AtURL = new(string)
+				*_m.AtURL = value.String
 			}
 		case post.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -133,11 +134,13 @@ func (_m *Post) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("at_url=")
-	builder.WriteString(_m.AtURL)
-	builder.WriteString(", ")
 	if v := _m.MarkdownContent; v != nil {
 		builder.WriteString("markdown_content=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.AtURL; v != nil {
+		builder.WriteString("at_url=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

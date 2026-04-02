@@ -27,15 +27,23 @@ func (_c *PostCreate) SetUserID(v uuid.UUID) *PostCreate {
 	return _c
 }
 
+// SetMarkdownContent sets the "markdown_content" field.
+func (_c *PostCreate) SetMarkdownContent(v string) *PostCreate {
+	_c.mutation.SetMarkdownContent(v)
+	return _c
+}
+
 // SetAtURL sets the "at_url" field.
 func (_c *PostCreate) SetAtURL(v string) *PostCreate {
 	_c.mutation.SetAtURL(v)
 	return _c
 }
 
-// SetMarkdownContent sets the "markdown_content" field.
-func (_c *PostCreate) SetMarkdownContent(v string) *PostCreate {
-	_c.mutation.SetMarkdownContent(v)
+// SetNillableAtURL sets the "at_url" field if the given value is not nil.
+func (_c *PostCreate) SetNillableAtURL(v *string) *PostCreate {
+	if v != nil {
+		_c.SetAtURL(*v)
+	}
 	return _c
 }
 
@@ -135,9 +143,6 @@ func (_c *PostCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Post.user_id"`)}
 	}
-	if _, ok := _c.mutation.AtURL(); !ok {
-		return &ValidationError{Name: "at_url", err: errors.New(`ent: missing required field "Post.at_url"`)}
-	}
 	if _, ok := _c.mutation.MarkdownContent(); !ok {
 		return &ValidationError{Name: "markdown_content", err: errors.New(`ent: missing required field "Post.markdown_content"`)}
 	}
@@ -186,13 +191,13 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_spec.SetField(post.FieldUserID, field.TypeUUID, value)
 		_node.UserID = value
 	}
-	if value, ok := _c.mutation.AtURL(); ok {
-		_spec.SetField(post.FieldAtURL, field.TypeString, value)
-		_node.AtURL = value
-	}
 	if value, ok := _c.mutation.MarkdownContent(); ok {
 		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
 		_node.MarkdownContent = &value
+	}
+	if value, ok := _c.mutation.AtURL(); ok {
+		_spec.SetField(post.FieldAtURL, field.TypeString, value)
+		_node.AtURL = &value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(post.FieldCreatedAt, field.TypeTime, value)

@@ -37,8 +37,8 @@ type PostMutation struct {
 	typ              string
 	id               *uuid.UUID
 	user_id          *uuid.UUID
-	at_url           *string
 	markdown_content *string
+	at_url           *string
 	created_at       *time.Time
 	updated_at       *time.Time
 	clearedFields    map[string]struct{}
@@ -187,42 +187,6 @@ func (m *PostMutation) ResetUserID() {
 	m.user_id = nil
 }
 
-// SetAtURL sets the "at_url" field.
-func (m *PostMutation) SetAtURL(s string) {
-	m.at_url = &s
-}
-
-// AtURL returns the value of the "at_url" field in the mutation.
-func (m *PostMutation) AtURL() (r string, exists bool) {
-	v := m.at_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAtURL returns the old "at_url" field's value of the Post entity.
-// If the Post object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PostMutation) OldAtURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAtURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAtURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAtURL: %w", err)
-	}
-	return oldValue.AtURL, nil
-}
-
-// ResetAtURL resets all changes to the "at_url" field.
-func (m *PostMutation) ResetAtURL() {
-	m.at_url = nil
-}
-
 // SetMarkdownContent sets the "markdown_content" field.
 func (m *PostMutation) SetMarkdownContent(s string) {
 	m.markdown_content = &s
@@ -257,6 +221,55 @@ func (m *PostMutation) OldMarkdownContent(ctx context.Context) (v *string, err e
 // ResetMarkdownContent resets all changes to the "markdown_content" field.
 func (m *PostMutation) ResetMarkdownContent() {
 	m.markdown_content = nil
+}
+
+// SetAtURL sets the "at_url" field.
+func (m *PostMutation) SetAtURL(s string) {
+	m.at_url = &s
+}
+
+// AtURL returns the value of the "at_url" field in the mutation.
+func (m *PostMutation) AtURL() (r string, exists bool) {
+	v := m.at_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAtURL returns the old "at_url" field's value of the Post entity.
+// If the Post object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PostMutation) OldAtURL(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAtURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAtURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAtURL: %w", err)
+	}
+	return oldValue.AtURL, nil
+}
+
+// ClearAtURL clears the value of the "at_url" field.
+func (m *PostMutation) ClearAtURL() {
+	m.at_url = nil
+	m.clearedFields[post.FieldAtURL] = struct{}{}
+}
+
+// AtURLCleared returns if the "at_url" field was cleared in this mutation.
+func (m *PostMutation) AtURLCleared() bool {
+	_, ok := m.clearedFields[post.FieldAtURL]
+	return ok
+}
+
+// ResetAtURL resets all changes to the "at_url" field.
+func (m *PostMutation) ResetAtURL() {
+	m.at_url = nil
+	delete(m.clearedFields, post.FieldAtURL)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -369,11 +382,11 @@ func (m *PostMutation) Fields() []string {
 	if m.user_id != nil {
 		fields = append(fields, post.FieldUserID)
 	}
-	if m.at_url != nil {
-		fields = append(fields, post.FieldAtURL)
-	}
 	if m.markdown_content != nil {
 		fields = append(fields, post.FieldMarkdownContent)
+	}
+	if m.at_url != nil {
+		fields = append(fields, post.FieldAtURL)
 	}
 	if m.created_at != nil {
 		fields = append(fields, post.FieldCreatedAt)
@@ -391,10 +404,10 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case post.FieldUserID:
 		return m.UserID()
-	case post.FieldAtURL:
-		return m.AtURL()
 	case post.FieldMarkdownContent:
 		return m.MarkdownContent()
+	case post.FieldAtURL:
+		return m.AtURL()
 	case post.FieldCreatedAt:
 		return m.CreatedAt()
 	case post.FieldUpdatedAt:
@@ -410,10 +423,10 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case post.FieldUserID:
 		return m.OldUserID(ctx)
-	case post.FieldAtURL:
-		return m.OldAtURL(ctx)
 	case post.FieldMarkdownContent:
 		return m.OldMarkdownContent(ctx)
+	case post.FieldAtURL:
+		return m.OldAtURL(ctx)
 	case post.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case post.FieldUpdatedAt:
@@ -434,19 +447,19 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
-	case post.FieldAtURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAtURL(v)
-		return nil
 	case post.FieldMarkdownContent:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMarkdownContent(v)
+		return nil
+	case post.FieldAtURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAtURL(v)
 		return nil
 	case post.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -491,7 +504,11 @@ func (m *PostMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PostMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(post.FieldAtURL) {
+		fields = append(fields, post.FieldAtURL)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -504,6 +521,11 @@ func (m *PostMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PostMutation) ClearField(name string) error {
+	switch name {
+	case post.FieldAtURL:
+		m.ClearAtURL()
+		return nil
+	}
 	return fmt.Errorf("unknown Post nullable field %s", name)
 }
 
@@ -514,11 +536,11 @@ func (m *PostMutation) ResetField(name string) error {
 	case post.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case post.FieldAtURL:
-		m.ResetAtURL()
-		return nil
 	case post.FieldMarkdownContent:
 		m.ResetMarkdownContent()
+		return nil
+	case post.FieldAtURL:
+		m.ResetAtURL()
 		return nil
 	case post.FieldCreatedAt:
 		m.ResetCreatedAt()

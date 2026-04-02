@@ -1,0 +1,124 @@
+package post
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
+	"arktie.org/ent"
+	postv1 "arktie.org/internal/pb/post/v1"
+	"arktie.org/internal/server/middleware"
+	ucpost "arktie.org/internal/usecase/post"
+)
+
+func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostRequest) (*postv1.CreatePostResponse, error) {
+	claim := middleware.UserFromContext(ctx)
+	if claim == nil {
+		return nil, status.Error(codes.Unauthenticated, "authentication required")
+	}
+
+	userID, err := uuid.Parse(claim.Subject)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	p, err := svc.resource.Create(ctx, userID, req.MarkdownContent)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to create post")
+	}
+
+	return &postv1.CreatePostResponse{Post: entPostToProto(p)}, nil
+}
+
+func (svc *Service) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*postv1.GetPostResponse, error) {
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid post id")
+	}
+
+	p, err := svc.resource.Get(ctx, id)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, status.Error(codes.NotFound, "post not found")
+		}
+		return nil, status.Error(codes.Internal, "failed to get post")
+	}
+
+	return &postv1.GetPostResponse{Post: entPostToProto(p)}, nil
+}
+
+func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostRequest) (*postv1.UpdatePostResponse, error) {
+	claim := middleware.UserFromContext(ctx)
+	if claim == nil {
+		return nil, status.Error(codes.Unauthenticated, "authentication required")
+	}
+
+	userID, err := uuid.Parse(claim.Subject)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid post id")
+	}
+
+	updated, err := svc.resource.Update(ctx, id, userID, req.MarkdownContent)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, status.Error(codes.NotFound, "post not found")
+		}
+		if err == ucpost.ErrForbidden {
+			return nil, status.Error(codes.PermissionDenied, "you are not the owner of this post")
+		}
+		return nil, status.Error(codes.Internal, "failed to update post")
+	}
+
+	return &postv1.UpdatePostResponse{Post: entPostToProto(updated)}, nil
+}
+
+func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostRequest) (*postv1.DeletePostResponse, error) {
+	claim := middleware.UserFromContext(ctx)
+	if claim == nil {
+		return nil, status.Error(codes.Unauthenticated, "authentication required")
+	}
+
+	userID, err := uuid.Parse(claim.Subject)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	id, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid post id")
+	}
+
+	if err := svc.resource.Delete(ctx, id, userID); err != nil {
+		if ent.IsNotFound(err) {
+			return nil, status.Error(codes.NotFound, "post not found")
+		}
+		return nil, status.Error(codes.Internal, "failed to delete post")
+	}
+
+	return &postv1.DeletePostResponse{}, nil
+}
+
+func entPostToProto(p *ent.Post) *postv1.Post {
+	pb := &postv1.Post{
+		Id:        p.ID.String(),
+		UserId:    p.UserID.String(),
+		CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
+
+	if p.AtURL != nil {
+		pb.AtUrl = *p.AtURL
+	}
+	if p.MarkdownContent != nil {
+		pb.MarkdownContent = p.MarkdownContent
+	}
+
+	return pb
+}
