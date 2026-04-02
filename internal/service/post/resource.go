@@ -85,6 +85,13 @@ func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostReques
 		return nil, status.Error(codes.Internal, "failed to update post")
 	}
 
+	if payload, err := json.Marshal(updated); err == nil {
+		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
+		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
+		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
+		svc.client.Publisher.Publish("post.updated", msg)
+	}
+
 	return &postv1.UpdatePostResponse{Post: updated.ToProto()}, nil
 }
 
@@ -109,6 +116,13 @@ func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostReques
 			return nil, status.Error(codes.NotFound, "post not found")
 		}
 		return nil, status.Error(codes.Internal, "failed to delete post")
+	}
+
+	{
+		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), message.Payload(id.String()))
+		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
+		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
+		svc.client.Publisher.Publish("post.deleted", msg)
 	}
 
 	return &postv1.DeletePostResponse{}, nil

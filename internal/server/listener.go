@@ -21,6 +21,20 @@ func NewListener(
 		postSyncher.Create,
 	)
 
+	client.Router.AddConsumerHandler(
+		"post.updated",
+		"post.updated",
+		client.Subscriber,
+		postSyncher.Update,
+	)
+
+	client.Router.AddConsumerHandler(
+		"post.deleted",
+		"post.deleted",
+		client.Subscriber,
+		postSyncher.Delete,
+	)
+
 	return &Listener{}
 }
 
