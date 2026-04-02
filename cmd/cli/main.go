@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -45,7 +44,7 @@ func main() {
 			}
 
 			slog.Info("running database migration")
-			if err := client.Ent.Schema.Create(context.Background()); err != nil {
+			if err := client.Ent.Schema.Create(cmd.Context()); err != nil {
 				return fmt.Errorf("failed to run migration: %w", err)
 			}
 
