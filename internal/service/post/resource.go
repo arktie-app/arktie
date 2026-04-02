@@ -33,6 +33,8 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 
 	if payload, err := json.Marshal(p); err == nil {
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
+		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
+		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
 		svc.client.Publisher.Publish("post.created", msg)
 	}
 
