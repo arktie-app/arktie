@@ -21,7 +21,7 @@ jobs:
           cache: true
 
       - name: Setup package
-        run: apt install -y protobuf-compiler
+        run: sudo apt update && sudo apt install -y protobuf-compiler
 
       - name: Install dependencies
         run: go mod download && make init
