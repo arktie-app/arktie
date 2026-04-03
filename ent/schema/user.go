@@ -17,7 +17,7 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.New()).Default(func() uuid.UUID { return uuid.Must(uuid.NewV7()) }).Immutable(),
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID { return uuid.Must(uuid.NewV7()) }).Immutable(),
 		field.String("account_did").Unique(),
 		field.Bytes("encryption_key"),
 		field.Time("last_active_at").Default(time.Now),

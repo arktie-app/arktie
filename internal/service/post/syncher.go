@@ -34,21 +34,22 @@ func (svc *Service) Create(msg *message.Message) error {
 
 	apiClient := sess.APIClient()
 
-	input := &agnostic.RepoCreateRecord_Input{
+	input := &agnostic.RepoPutRecord_Input{
 		Repo:       apiClient.AccountDID.String(),
 		Collection: "app.arktie.post",
-		Rkey:       new(p.ID.String()),
+		Rkey:       p.ID.String(),
 		Record:     p.ToPDSRecord(),
 	}
 
-	var out agnostic.RepoCreateRecord_Output
-	if err := apiClient.Post(msg.Context(), "com.atproto.repo.createRecord", input, &out); err != nil {
+	var out agnostic.RepoPutRecord_Output
+	if err := apiClient.Post(msg.Context(), "com.atproto.repo.putRecord", input, &out); err != nil {
 		return fmt.Errorf("failed to create record on PDS: %w", err)
 	}
 
 	if out.Uri != "" {
 		if err := svc.client.Ent.Post.UpdateOneID(p.ID).SetAtURL(out.Uri).Exec(msg.Context()); err != nil {
 			slog.Error("failed to update post at_url", liblogs.ErrAttr(err), slog.String("post_id", p.ID.String()), slog.String("at_url", out.Uri))
+			return fmt.Errorf("failed to update at_url on posts: %w", err)
 		}
 	}
 
@@ -91,6 +92,7 @@ func (svc *Service) Update(msg *message.Message) error {
 	if out.Uri != "" {
 		if err := svc.client.Ent.Post.UpdateOneID(p.ID).SetAtURL(out.Uri).Exec(msg.Context()); err != nil {
 			slog.Error("failed to update post at_url", liblogs.ErrAttr(err), slog.String("post_id", p.ID.String()), slog.String("at_url", out.Uri))
+			return fmt.Errorf("failed to update at_url on posts: %w", err)
 		}
 	}
 

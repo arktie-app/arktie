@@ -17,8 +17,8 @@ type Post struct {
 // Fields of the Post.
 func (Post) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.New()).Default(func() uuid.UUID { return uuid.Must(uuid.NewV7()) }).Immutable(),
-		field.UUID("user_id", uuid.New()),
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID { return uuid.Must(uuid.NewV7()) }).Immutable(),
+		field.UUID("user_id", uuid.UUID{}),
 		field.String("markdown_content").Nillable().Optional(),
 		field.String("at_url").Nillable().Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),

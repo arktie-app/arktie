@@ -36,6 +36,8 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
 		svc.client.Publisher.Publish("post.created", msg)
+	} else {
+		return nil, status.Error(codes.Internal, "failed to encode json")
 	}
 
 	return &postv1.CreatePostResponse{Post: p.ToProto()}, nil
@@ -90,6 +92,8 @@ func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostReques
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
 		svc.client.Publisher.Publish("post.updated", msg)
+	} else {
+		return nil, status.Error(codes.Internal, "failed to encode json")
 	}
 
 	return &postv1.UpdatePostResponse{Post: updated.ToProto()}, nil
