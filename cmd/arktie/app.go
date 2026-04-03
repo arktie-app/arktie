@@ -19,8 +19,7 @@ type App struct {
 }
 
 func (a *App) Run(ctx context.Context) error {
-
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	g, ctx := errgroup.WithContext(ctx)

@@ -3,6 +3,7 @@ package post
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/google/uuid"
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"arktie.org/ent"
+	"arktie.org/internal/lib/liblogs"
 	postv1 "arktie.org/internal/pb/post/v1"
 	"arktie.org/internal/server/middleware"
 	ucpost "arktie.org/internal/usecase/post"
@@ -35,7 +37,10 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
-		svc.client.Publisher.Publish("post.created", msg)
+		if err := svc.client.Publisher.Publish("post.created", msg); err != nil {
+			slog.ErrorContext(ctx, "failed to publish post.create", liblogs.ErrAttr(err))
+			return nil, status.Error(codes.Internal, "failedc to publish post.create")
+		}
 	} else {
 		return nil, status.Error(codes.Internal, "failed to encode json")
 	}
@@ -91,7 +96,10 @@ func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostReques
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
-		svc.client.Publisher.Publish("post.updated", msg)
+		if err := svc.client.Publisher.Publish("post.updated", msg); err != nil {
+			slog.ErrorContext(ctx, "failed to publish post.update", liblogs.ErrAttr(err))
+			return nil, status.Error(codes.Internal, "failed to publish post.update")
+		}
 	} else {
 		return nil, status.Error(codes.Internal, "failed to encode json")
 	}
@@ -126,7 +134,10 @@ func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostReques
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), message.Payload(id.String()))
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
-		svc.client.Publisher.Publish("post.deleted", msg)
+		if err := svc.client.Publisher.Publish("post.deleted", msg); err != nil {
+			slog.ErrorContext(ctx, "failed to publish post.deleted", liblogs.ErrAttr(err))
+			return nil, status.Error(codes.Internal, "failed to publish post.deleted")
+		}
 	}
 
 	return &postv1.DeletePostResponse{}, nil

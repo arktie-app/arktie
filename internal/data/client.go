@@ -10,7 +10,6 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
-	"github.com/ThreeDotsLabs/watermill/message/router/plugin"
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/XSAM/otelsql"
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
@@ -108,10 +107,6 @@ func (c *Client) initWatermill(cfg *Config) error {
 	if err != nil {
 		return err
 	}
-
-	// SignalsHandler will gracefully shutdown Router when SIGTERM is received.
-	// You can also close the router by just calling `r.Close()`.
-	router.AddPlugin(plugin.SignalsHandler)
 
 	// Router level middleware are executed for every message sent to the router
 	router.AddMiddleware(
