@@ -6,6 +6,9 @@ BIN_DIR := bin
 # Source command directory
 CMD_DIR := cmd
 
+# Additional protobuf include path (e.g., /opt/homebrew/include on macOS)
+PROTO_INCLUDE ?=
+
 # Get all subdirectories in cmd/
 CMDS := $(notdir $(wildcard $(CMD_DIR)/*))
 
@@ -33,7 +36,7 @@ proto:
 		--go-grpc_out=internal/pb --go-grpc_opt=paths=source_relative \
 		--grpc-gateway_out=internal/pb --grpc-gateway_opt=paths=source_relative \
 		-I proto \
-		-I /opt/homebrew/include \
+		$(if $(PROTO_INCLUDE),-I $(PROTO_INCLUDE)) \
 		proto/post/v1/post.proto
 
 # Generate code
