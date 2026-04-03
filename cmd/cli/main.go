@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/liblogs"
 )
 
@@ -38,13 +39,13 @@ func main() {
 				return fmt.Errorf("failed to load config: %w", err)
 			}
 
-			client, err := data.NewClient(cfg)
+			db, err := client.NewDatabase(cfg)
 			if err != nil {
-				return fmt.Errorf("failed to init data client: %w", err)
+				return fmt.Errorf("failed to init database client: %w", err)
 			}
 
 			slog.Info("running database migration")
-			if err := client.Ent.Schema.Create(cmd.Context()); err != nil {
+			if err := db.Ent.Schema.Create(cmd.Context()); err != nil {
 				return fmt.Errorf("failed to run migration: %w", err)
 			}
 

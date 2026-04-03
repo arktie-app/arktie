@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"arktie.org/ent"
-	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	postv1 "arktie.org/internal/pb/post/v1"
 	ucpost "arktie.org/internal/usecase/post"
 )
@@ -15,14 +15,16 @@ type Service struct {
 	postv1.UnimplementedPostServiceServer
 
 	resource PostResource
-	client   *data.Client
+	db       *client.Database
+	event    *client.Event
 	pds      PDSRecordAPI
 }
 
-func NewService(resource PostResource, pds PDSRecordAPI, client *data.Client) *Service {
+func NewService(resource PostResource, pds PDSRecordAPI, db *client.Database, event *client.Event) *Service {
 	return &Service{
 		resource: resource,
-		client:   client,
+		db:       db,
+		event:    event,
 		pds:      pds,
 	}
 }

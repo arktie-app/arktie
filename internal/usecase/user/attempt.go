@@ -20,7 +20,7 @@ func (uc *Usecase) Attempt(ctx context.Context, session *oauth.ClientSessionData
 
 	// Try to create the user first. If the account_did already exists
 	// (unique constraint violation), fall back to a query.
-	u, err := uc.client.Ent.User.Create().
+	u, err := uc.db.Ent.User.Create().
 		SetAccountDid(session.AccountDID.String()).
 		SetEncryptionKey(key).
 		Save(ctx)
@@ -32,7 +32,7 @@ func (uc *Usecase) Attempt(ctx context.Context, session *oauth.ClientSessionData
 		return nil, err
 	}
 
-	u, err = uc.client.Ent.User.Query().
+	u, err = uc.db.Ent.User.Query().
 		Where(user.AccountDid(session.AccountDID.String())).
 		Only(ctx)
 	if err != nil {

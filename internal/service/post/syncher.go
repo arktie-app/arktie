@@ -26,7 +26,7 @@ func (svc *Service) Create(msg *message.Message) error {
 	}
 
 	if uri != "" {
-		if err := svc.client.Ent.Post.UpdateOneID(p.ID).SetAtURL(uri).Exec(msg.Context()); err != nil {
+		if err := svc.db.Ent.Post.UpdateOneID(p.ID).SetAtURL(uri).Exec(msg.Context()); err != nil {
 			slog.Error("failed to update post at_url", liblogs.ErrAttr(err), slog.String("post_id", p.ID.String()), slog.String("at_url", uri))
 			return fmt.Errorf("failed to update at_url on posts: %w", err)
 		}
@@ -50,7 +50,7 @@ func (svc *Service) Update(msg *message.Message) error {
 	}
 
 	if uri != "" {
-		if err := svc.client.Ent.Post.UpdateOneID(p.ID).SetAtURL(uri).Exec(msg.Context()); err != nil {
+		if err := svc.db.Ent.Post.UpdateOneID(p.ID).SetAtURL(uri).Exec(msg.Context()); err != nil {
 			slog.Error("failed to update post at_url", liblogs.ErrAttr(err), slog.String("post_id", p.ID.String()), slog.String("at_url", uri))
 			return fmt.Errorf("failed to update at_url on posts: %w", err)
 		}

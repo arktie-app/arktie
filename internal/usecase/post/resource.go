@@ -10,7 +10,7 @@ import (
 )
 
 func (uc *Usecase) Create(ctx context.Context, userID uuid.UUID, markdownContent *string) (*ent.Post, error) {
-	builder := uc.client.Ent.Post.Create().
+	builder := uc.db.Ent.Post.Create().
 		SetUserID(userID)
 
 	if markdownContent != nil {
@@ -21,11 +21,11 @@ func (uc *Usecase) Create(ctx context.Context, userID uuid.UUID, markdownContent
 }
 
 func (uc *Usecase) Get(ctx context.Context, id uuid.UUID) (*ent.Post, error) {
-	return uc.client.Ent.Post.Get(ctx, id)
+	return uc.db.Ent.Post.Get(ctx, id)
 }
 
 func (uc *Usecase) Update(ctx context.Context, id uuid.UUID, userID uuid.UUID, markdownContent *string) (*ent.Post, error) {
-	p, err := uc.client.Ent.Post.Get(ctx, id)
+	p, err := uc.db.Ent.Post.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (uc *Usecase) Update(ctx context.Context, id uuid.UUID, userID uuid.UUID, m
 		return nil, ErrForbidden
 	}
 
-	builder := uc.client.Ent.Post.UpdateOneID(id)
+	builder := uc.db.Ent.Post.UpdateOneID(id)
 	if markdownContent != nil {
 		builder.SetMarkdownContent(*markdownContent)
 	}
@@ -43,7 +43,7 @@ func (uc *Usecase) Update(ctx context.Context, id uuid.UUID, userID uuid.UUID, m
 }
 
 func (uc *Usecase) Delete(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
-	n, err := uc.client.Ent.Post.Delete().
+	n, err := uc.db.Ent.Post.Delete().
 		Where(entpost.ID(id), entpost.UserID(userID)).
 		Exec(ctx)
 	if err != nil {

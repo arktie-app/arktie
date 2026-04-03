@@ -9,6 +9,7 @@ import (
 
 	"arktie.org/ent"
 	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/lib/libjwt"
 	"arktie.org/internal/lib/liblogs"
@@ -21,16 +22,16 @@ import (
 )
 
 type Service struct {
-	cfg    *data.Config
-	client *data.Client
+	cfg   *data.Config
+	oauth *client.OAuth
 
 	attempter UserAttempter
 }
 
-func NewService(cfg *data.Config, client *data.Client, attempter UserAttempter) *Service {
+func NewService(cfg *data.Config, oauth *client.OAuth, attempter UserAttempter) *Service {
 	return &Service{
 		cfg:       cfg,
-		client:    client,
+		oauth:     oauth,
 		attempter: attempter,
 	}
 }
@@ -43,7 +44,7 @@ var _ UserAttempter = &user.Usecase{}
 
 // ClientConfig handles GET /oauth/client-metadata.json
 func (svc *Service) ClientConfig(w http.ResponseWriter, r *http.Request) {
-	libhttp.WriteJSON(w, http.StatusOK, svc.client.OAuth.Config.ClientMetadata())
+	libhttp.WriteJSON(w, http.StatusOK, svc.oauth.ATProto.Config.ClientMetadata())
 }
 
 // Start handles GET /oauth/start?handle=<handle>.
@@ -57,7 +58,7 @@ func (svc *Service) Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectURL, err := svc.client.OAuth.StartAuthFlow(r.Context(), handle)
+	redirectURL, err := svc.oauth.ATProto.StartAuthFlow(r.Context(), handle)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "failed to start auth flow", liblogs.ErrAttr(err))
 		libhttp.WriteError(w, http.StatusBadRequest, "failed to start auth flow")
@@ -74,7 +75,7 @@ func (svc *Service) Start(w http.ResponseWriter, r *http.Request) {
 // exchange, creates a server-side session, sets the httpOnly cookie, and
 // redirects the browser to the home page.
 func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
-	atSession, err := svc.client.OAuth.ProcessCallback(r.Context(), r.URL.Query())
+	atSession, err := svc.oauth.ATProto.ProcessCallback(r.Context(), r.URL.Query())
 	if err != nil {
 		slog.WarnContext(r.Context(), "failed to get OAuth callback", liblogs.ErrAttr(err))
 		http.Redirect(w, r, "/?error=process_callback_failed", http.StatusFound)
@@ -124,7 +125,7 @@ func (svc *Service) Callback(w http.ResponseWriter, r *http.Request) {
 func (svc *Service) Logout(w http.ResponseWriter, r *http.Request) {
 	user := middleware.UserFromContext(r.Context())
 
-	if err := svc.client.OAuth.Logout(r.Context(), user.Session.AccountDID, user.Session.SessionID); err != nil {
+	if err := svc.oauth.ATProto.Logout(r.Context(), user.Session.AccountDID, user.Session.SessionID); err != nil {
 		slog.WarnContext(r.Context(), "failed to logout from oauth client", liblogs.ErrAttr(err))
 	}
 

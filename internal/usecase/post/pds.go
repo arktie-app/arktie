@@ -7,16 +7,16 @@ import (
 	"github.com/bluesky-social/indigo/api/agnostic"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 
-	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 )
 
 // PDSRecord handles PDS record operations via OAuth sessions.
 type PDSRecord struct {
-	client *data.Client
+	oauth *client.OAuth
 }
 
-func NewPDSRecord(client *data.Client) *PDSRecord {
-	return &PDSRecord{client: client}
+func NewPDSRecord(oauth *client.OAuth) *PDSRecord {
+	return &PDSRecord{oauth: oauth}
 }
 
 func (p *PDSRecord) PutRecord(ctx context.Context, accountDID, sessionID, collection, rkey string, record map[string]any) (string, error) {
@@ -25,7 +25,7 @@ func (p *PDSRecord) PutRecord(ctx context.Context, accountDID, sessionID, collec
 		return "", fmt.Errorf("failed to parse DID %s: %w", accountDID, err)
 	}
 
-	sess, err := p.client.OAuth.ResumeSession(ctx, did, sessionID)
+	sess, err := p.oauth.ATProto.ResumeSession(ctx, did, sessionID)
 	if err != nil {
 		return "", fmt.Errorf("failed to resume session for %s: %w", did, err)
 	}
@@ -53,7 +53,7 @@ func (p *PDSRecord) DeleteRecord(ctx context.Context, accountDID, sessionID, col
 		return fmt.Errorf("failed to parse DID %s: %w", accountDID, err)
 	}
 
-	sess, err := p.client.OAuth.ResumeSession(ctx, did, sessionID)
+	sess, err := p.oauth.ATProto.ResumeSession(ctx, did, sessionID)
 	if err != nil {
 		return fmt.Errorf("failed to resume session for %s: %w", did, err)
 	}

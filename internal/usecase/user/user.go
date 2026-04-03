@@ -1,13 +1,13 @@
 package user
 
-import "arktie.org/internal/data"
+import "arktie.org/internal/data/client"
 
 type Usecase struct {
-	client *data.Client
+	db *client.Database
 }
 
-func NewUsecase(client *data.Client) *Usecase {
+func NewUsecase(db *client.Database) *Usecase {
 	return &Usecase{
-		client: client,
+		db: db,
 	}
 }

@@ -17,7 +17,7 @@ import (
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	_ "modernc.org/sqlite"
 
-	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 )
 
 func setupUsecase(t *testing.T) *Usecase {
@@ -28,13 +28,13 @@ func setupUsecase(t *testing.T) *Usecase {
 		t.Fatal(err)
 	}
 
-	client := enttest.NewClient(t,
+	entClient := enttest.NewClient(t,
 		enttest.WithOptions(ent.Driver(entsql.OpenDB("sqlite3", db))),
 		enttest.WithMigrateOptions(schema.WithForeignKeys(true)),
 	)
-	t.Cleanup(func() { client.Close() })
+	t.Cleanup(func() { entClient.Close() })
 
-	return NewUsecase(&data.Client{Ent: client})
+	return NewUsecase(&client.Database{Ent: entClient})
 }
 
 func TestAttempt_CreateNewUser(t *testing.T) {

@@ -18,7 +18,7 @@ import (
 
 	"arktie.org/ent"
 	"arktie.org/ent/enttest"
-	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 )
 
 func setupSyncherTest(t *testing.T, pds *PDSRecordAPIMock) (*Service, *ent.Client) {
@@ -36,8 +36,8 @@ func setupSyncherTest(t *testing.T, pds *PDSRecordAPIMock) (*Service, *ent.Clien
 	t.Cleanup(func() { entClient.Close() })
 
 	svc := &Service{
-		client: &data.Client{Ent: entClient},
-		pds:    pds,
+		db:  &client.Database{Ent: entClient},
+		pds: pds,
 	}
 
 	return svc, entClient
