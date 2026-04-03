@@ -14,7 +14,9 @@ type OAuth struct {
 func NewOAuth(cfg *data.Config, db *Database) (client *OAuth, err error) {
 	client = &OAuth{}
 
-	client.initATProtoClientApp(cfg, db)
+	if err = client.initATProtoClientApp(cfg, db); err != nil {
+		return
+	}
 
 	return
 }
