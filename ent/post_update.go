@@ -58,6 +58,12 @@ func (_u *PostUpdate) SetNillableMarkdownContent(v *string) *PostUpdate {
 	return _u
 }
 
+// ClearMarkdownContent clears the value of the "markdown_content" field.
+func (_u *PostUpdate) ClearMarkdownContent() *PostUpdate {
+	_u.mutation.ClearMarkdownContent()
+	return _u
+}
+
 // SetAtURL sets the "at_url" field.
 func (_u *PostUpdate) SetAtURL(v string) *PostUpdate {
 	_u.mutation.SetAtURL(v)
@@ -159,6 +165,9 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.MarkdownContent(); ok {
 		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
 	}
+	if _u.mutation.MarkdownContentCleared() {
+		_spec.ClearField(post.FieldMarkdownContent, field.TypeString)
+	}
 	if value, ok := _u.mutation.AtURL(); ok {
 		_spec.SetField(post.FieldAtURL, field.TypeString, value)
 	}
@@ -242,6 +251,12 @@ func (_u *PostUpdateOne) SetNillableMarkdownContent(v *string) *PostUpdateOne {
 	if v != nil {
 		_u.SetMarkdownContent(*v)
 	}
+	return _u
+}
+
+// ClearMarkdownContent clears the value of the "markdown_content" field.
+func (_u *PostUpdateOne) ClearMarkdownContent() *PostUpdateOne {
+	_u.mutation.ClearMarkdownContent()
 	return _u
 }
 
@@ -375,6 +390,9 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	}
 	if value, ok := _u.mutation.MarkdownContent(); ok {
 		_spec.SetField(post.FieldMarkdownContent, field.TypeString, value)
+	}
+	if _u.mutation.MarkdownContentCleared() {
+		_spec.ClearField(post.FieldMarkdownContent, field.TypeString)
 	}
 	if value, ok := _u.mutation.AtURL(); ok {
 		_spec.SetField(post.FieldAtURL, field.TypeString, value)

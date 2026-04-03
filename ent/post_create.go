@@ -34,6 +34,14 @@ func (_c *PostCreate) SetMarkdownContent(v string) *PostCreate {
 	return _c
 }
 
+// SetNillableMarkdownContent sets the "markdown_content" field if the given value is not nil.
+func (_c *PostCreate) SetNillableMarkdownContent(v *string) *PostCreate {
+	if v != nil {
+		_c.SetMarkdownContent(*v)
+	}
+	return _c
+}
+
 // SetAtURL sets the "at_url" field.
 func (_c *PostCreate) SetAtURL(v string) *PostCreate {
 	_c.mutation.SetAtURL(v)
@@ -148,9 +156,6 @@ func (_c *PostCreate) defaults() {
 func (_c *PostCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Post.user_id"`)}
-	}
-	if _, ok := _c.mutation.MarkdownContent(); !ok {
-		return &ValidationError{Name: "markdown_content", err: errors.New(`ent: missing required field "Post.markdown_content"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Post.created_at"`)}

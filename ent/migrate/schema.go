@@ -11,7 +11,7 @@ var (
 	// PostsColumns holds the columns for the "posts" table.
 	PostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "markdown_content", Type: field.TypeString},
+		{Name: "markdown_content", Type: field.TypeString, Nullable: true},
 		{Name: "at_url", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},

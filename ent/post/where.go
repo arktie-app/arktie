@@ -156,6 +156,16 @@ func MarkdownContentHasSuffix(v string) predicate.Post {
 	return predicate.Post(sql.FieldHasSuffix(FieldMarkdownContent, v))
 }
 
+// MarkdownContentIsNil applies the IsNil predicate on the "markdown_content" field.
+func MarkdownContentIsNil() predicate.Post {
+	return predicate.Post(sql.FieldIsNull(FieldMarkdownContent))
+}
+
+// MarkdownContentNotNil applies the NotNil predicate on the "markdown_content" field.
+func MarkdownContentNotNil() predicate.Post {
+	return predicate.Post(sql.FieldNotNull(FieldMarkdownContent))
+}
+
 // MarkdownContentEqualFold applies the EqualFold predicate on the "markdown_content" field.
 func MarkdownContentEqualFold(v string) predicate.Post {
 	return predicate.Post(sql.FieldEqualFold(FieldMarkdownContent, v))

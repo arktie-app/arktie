@@ -219,9 +219,22 @@ func (m *PostMutation) OldMarkdownContent(ctx context.Context) (v *string, err e
 	return oldValue.MarkdownContent, nil
 }
 
+// ClearMarkdownContent clears the value of the "markdown_content" field.
+func (m *PostMutation) ClearMarkdownContent() {
+	m.markdown_content = nil
+	m.clearedFields[post.FieldMarkdownContent] = struct{}{}
+}
+
+// MarkdownContentCleared returns if the "markdown_content" field was cleared in this mutation.
+func (m *PostMutation) MarkdownContentCleared() bool {
+	_, ok := m.clearedFields[post.FieldMarkdownContent]
+	return ok
+}
+
 // ResetMarkdownContent resets all changes to the "markdown_content" field.
 func (m *PostMutation) ResetMarkdownContent() {
 	m.markdown_content = nil
+	delete(m.clearedFields, post.FieldMarkdownContent)
 }
 
 // SetAtURL sets the "at_url" field.
@@ -533,6 +546,9 @@ func (m *PostMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *PostMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(post.FieldMarkdownContent) {
+		fields = append(fields, post.FieldMarkdownContent)
+	}
 	if m.FieldCleared(post.FieldAtURL) {
 		fields = append(fields, post.FieldAtURL)
 	}
@@ -550,6 +566,9 @@ func (m *PostMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *PostMutation) ClearField(name string) error {
 	switch name {
+	case post.FieldMarkdownContent:
+		m.ClearMarkdownContent()
+		return nil
 	case post.FieldAtURL:
 		m.ClearAtURL()
 		return nil
