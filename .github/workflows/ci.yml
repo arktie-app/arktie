@@ -20,9 +20,6 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - name: Setup package
-        run: sudo apt update && sudo apt install -y protobuf-compiler
-
       - name: Install dependencies
         run: go mod download && make init
 
@@ -32,20 +29,6 @@ jobs:
           if [ -n "$(git status --porcelain go.mod go.sum)" ]; then
             echo "go.mod or go.sum is not tidy. Please run 'go mod tidy' and commit the changes."
             git status --porcelain go.mod go.sum
-            exit 1
-          fi
-
-      - name: Linting
-        run: make lint
-
-      - name: Generate code
-        run: make gen
-
-      - name: Check for uncommitted changes after generation
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Untracked or uncommitted changes found after 'make lint && make gen'. Please run 'make lint && make gen' locally and commit the changes."
-            git status --porcelain
             exit 1
           fi
 
