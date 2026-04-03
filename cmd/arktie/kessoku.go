@@ -37,6 +37,10 @@ var _ = kessoku.Inject[*App](
 	kessoku.Bind[post.PostResource](
 		kessoku.Provide(func(uc *ucpost.Usecase) post.PostResource { return uc }),
 	),
+	kessoku.Provide(ucpost.NewPDSRecord),
+	kessoku.Bind[post.PDSRecordAPI](
+		kessoku.Provide(func(p *ucpost.PDSRecord) post.PDSRecordAPI { return p }),
+	),
 
 	// services
 	kessoku.Provide(oauth.NewService),

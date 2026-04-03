@@ -23,14 +23,18 @@ func newApp(config *data.Config) (*App, error) {
 		return zero, err
 	}
 	usecase := kessoku.Provide(post0.NewUsecase).Fn()(client)
+	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(client)
 	usecase0 := kessoku.Provide(user.NewUsecase).Fn()(client)
 	postResource := kessoku.Bind[post.PostResource](kessoku.Provide(func(uc *post0.Usecase) post.PostResource {
 		return uc
 	})).Fn()(usecase)
+	pdsrecordAPI := kessoku.Bind[post.PDSRecordAPI](kessoku.Provide(func(p *post0.PDSRecord) post.PDSRecordAPI {
+		return p
+	})).Fn()(pdsrecord)
 	userAttempter := kessoku.Bind[oauth.UserAttempter](kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter {
 		return uc
 	})).Fn()(usecase0)
-	service := kessoku.Provide(post.NewService).Fn()(postResource, client)
+	service := kessoku.Provide(post.NewService).Fn()(postResource, pdsrecordAPI, client)
 	service0 := kessoku.Provide(oauth.NewService).Fn()(config, client, userAttempter)
 	postSyncher := kessoku.Bind[server.PostSyncher](kessoku.Provide(func(s *post.Service) server.PostSyncher {
 		return s

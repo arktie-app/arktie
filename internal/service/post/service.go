@@ -16,15 +16,18 @@ type Service struct {
 
 	resource PostResource
 	client   *data.Client
+	pds      PDSRecordAPI
 }
 
-func NewService(resource PostResource, client *data.Client) *Service {
+func NewService(resource PostResource, pds PDSRecordAPI, client *data.Client) *Service {
 	return &Service{
 		resource: resource,
 		client:   client,
+		pds:      pds,
 	}
 }
 
+//go:generate go tool moq -rm -out mock_post_resource.go . PostResource
 type PostResource interface {
 	Create(ctx context.Context, userID uuid.UUID, markdownContent *string) (*ent.Post, error)
 	Get(ctx context.Context, id uuid.UUID) (*ent.Post, error)
@@ -33,3 +36,13 @@ type PostResource interface {
 }
 
 var _ PostResource = &ucpost.Usecase{}
+
+//go:generate go tool moq -rm -out mock_pds.go . PDSRecordAPI
+
+// PDSRecordAPI abstracts PDS record operations for testability.
+type PDSRecordAPI interface {
+	PutRecord(ctx context.Context, accountDID, sessionID, collection, rkey string, record map[string]any) (uri string, err error)
+	DeleteRecord(ctx context.Context, accountDID, sessionID, collection, rkey string) error
+}
+
+var _ PDSRecordAPI = &ucpost.PDSRecord{}
