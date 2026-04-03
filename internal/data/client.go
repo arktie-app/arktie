@@ -1,10 +1,16 @@
 package data
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/XSAM/otelsql"
 	"github.com/bluesky-social/indigo/atproto/auth/oauth"
 	"github.com/redis/go-redis/extra/redisotel/v9"
@@ -15,10 +21,22 @@ import (
 	"arktie.org/pkg/atproto"
 )
 
+//go:generate go tool moq -rm -out mock_message.go . MessagePublisher MessageSubscriber
+
+// MessagePublisher wraps watermill's message.Publisher for mock generation.
+type MessagePublisher = message.Publisher
+
+// MessageSubscriber wraps watermill's message.Subscriber for mock generation.
+type MessageSubscriber = message.Subscriber
+
 type Client struct {
 	Ent   *ent.Client
 	RDB   *redis.Client
 	OAuth *oauth.ClientApp
+
+	Publisher  message.Publisher
+	Subscriber message.Subscriber
+	Router     *message.Router
 }
 
 func NewClient(cfg *Config) (client *Client, err error) {
@@ -33,6 +51,10 @@ func NewClient(cfg *Config) (client *Client, err error) {
 	}
 
 	if err = client.initOAuthClientApp(cfg); err != nil {
+		return
+	}
+
+	if err = client.initWatermill(cfg); err != nil {
 		return
 	}
 
@@ -64,7 +86,7 @@ func (c *Client) initRedisClient(cfg *Config) (err error) {
 func (c *Client) initOAuthClientApp(cfg *Config) error {
 	scopes := []string{
 		"atproto",
-		// "repo:app.arktie?action=create"
+		"repo:app.arktie.post",
 	}
 
 	var clientConfig oauth.ClientConfig
@@ -79,5 +101,39 @@ func (c *Client) initOAuthClientApp(cfg *Config) error {
 	}
 
 	c.OAuth = oauth.NewClientApp(&clientConfig, atproto.NewRedisStore(c.RDB))
+	return nil
+}
+
+func (c *Client) initWatermill(cfg *Config) error {
+	logger := watermill.NewStdLogger(cfg.App.Debug, cfg.App.Debug)
+
+	pubSub := gochannel.NewGoChannel(gochannel.Config{}, logger)
+	c.Publisher = pubSub
+	c.Subscriber = pubSub
+
+	router, err := message.NewRouter(message.RouterConfig{}, logger)
+	if err != nil {
+		return err
+	}
+
+	// Router level middleware are executed for every message sent to the router
+	router.AddMiddleware(
+		// CorrelationID will copy the correlation id from the incoming message's metadata to the produced messages
+		middleware.CorrelationID,
+
+		// The handler function is retried if it returns an error.
+		// After MaxRetries, the message is Nacked and it's up to the PubSub to resend it.
+		middleware.Retry{
+			MaxRetries:      3,
+			InitialInterval: time.Millisecond * 100,
+			Logger:          logger,
+		}.Middleware,
+
+		// Recoverer handles panics from handlers.
+		// In this case, it passes them as errors to the Retry middleware.
+		middleware.Recoverer,
+	)
+
+	c.Router = router
 	return nil
 }

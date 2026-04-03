@@ -8,6 +8,29 @@ import (
 )
 
 var (
+	// PostsColumns holds the columns for the "posts" table.
+	PostsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "markdown_content", Type: field.TypeString, Nullable: true},
+		{Name: "at_url", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// PostsTable holds the schema information for the "posts" table.
+	PostsTable = &schema.Table{
+		Name:       "posts",
+		Columns:    PostsColumns,
+		PrimaryKey: []*schema.Column{PostsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "posts_users_posts",
+				Columns:    []*schema.Column{PostsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -25,9 +48,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		PostsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	PostsTable.ForeignKeys[0].RefTable = UsersTable
 }

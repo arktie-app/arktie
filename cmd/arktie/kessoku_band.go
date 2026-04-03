@@ -6,6 +6,8 @@ import (
 	"arktie.org/internal/data"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/oauth"
+	"arktie.org/internal/service/post"
+	post0 "arktie.org/internal/usecase/post"
 	"arktie.org/internal/usecase/user"
 	"github.com/mazrean/kessoku"
 	"golang.org/x/net/http2"
@@ -13,24 +15,37 @@ import (
 	"net/http"
 )
 
-func newServer(config *data.Config) (*http.Server, error) {
+func newApp(config *data.Config) (*App, error) {
 	var err error
 	client, err := kessoku.Provide(data.NewClient).Fn()(config)
 	if err != nil {
-		var zero *http.Server
+		var zero *App
 		return zero, err
 	}
-	usecase := kessoku.Provide(user.NewUsecase).Fn()(client)
-	userAttempter := kessoku.Bind[oauth.UserAttempter](kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter {
+	usecase := kessoku.Provide(post0.NewUsecase).Fn()(client)
+	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(client)
+	usecase0 := kessoku.Provide(user.NewUsecase).Fn()(client)
+	postResource := kessoku.Bind[post.PostResource](kessoku.Provide(func(uc *post0.Usecase) post.PostResource {
 		return uc
 	})).Fn()(usecase)
-	service := kessoku.Provide(oauth.NewService).Fn()(config, client, userAttempter)
-	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
+	pdsrecordAPI := kessoku.Bind[post.PDSRecordAPI](kessoku.Provide(func(p *post0.PDSRecord) post.PDSRecordAPI {
+		return p
+	})).Fn()(pdsrecord)
+	userAttempter := kessoku.Bind[oauth.UserAttempter](kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter {
+		return uc
+	})).Fn()(usecase0)
+	service := kessoku.Provide(post.NewService).Fn()(postResource, pdsrecordAPI, client)
+	service0 := kessoku.Provide(oauth.NewService).Fn()(config, client, userAttempter)
+	postSyncher := kessoku.Bind[server.PostSyncher](kessoku.Provide(func(s *post.Service) server.PostSyncher {
 		return s
 	})).Fn()(service)
-	handler := kessoku.Provide(server.NewHandler).Fn()(config, client, oauthHandler)
-	server0 := kessoku.Provide(func(cfg *data.Config, handler http.Handler) *http.Server {
-		return &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}
-	}).Fn()(config, handler)
-	return server0, nil
+	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
+		return s
+	})).Fn()(service0)
+	listener := kessoku.Provide(server.NewListener).Fn()(client, postSyncher)
+	handler := kessoku.Provide(server.NewHandler).Fn()(config, client, oauthHandler, service)
+	app := kessoku.Provide(func(cfg *data.Config, client *data.Client, handler http.Handler, _ *server.Listener) *App {
+		return &App{HTTP: &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}, Router: client.Router}
+	}).Fn()(config, client, handler, listener)
+	return app, nil
 }

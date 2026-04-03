@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"time"
 
+	"arktie.org/ent/post"
 	"arktie.org/ent/predicate"
 	"arktie.org/ent/user"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -68,9 +70,45 @@ func (_u *UserUpdate) SetUpdatedAt(v time.Time) *UserUpdate {
 	return _u
 }
 
+// AddPostIDs adds the "posts" edge to the Post entity by IDs.
+func (_u *UserUpdate) AddPostIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddPostIDs(ids...)
+	return _u
+}
+
+// AddPosts adds the "posts" edges to the Post entity.
+func (_u *UserUpdate) AddPosts(v ...*Post) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPostIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
+}
+
+// ClearPosts clears all "posts" edges to the Post entity.
+func (_u *UserUpdate) ClearPosts() *UserUpdate {
+	_u.mutation.ClearPosts()
+	return _u
+}
+
+// RemovePostIDs removes the "posts" edge to Post entities by IDs.
+func (_u *UserUpdate) RemovePostIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemovePostIDs(ids...)
+	return _u
+}
+
+// RemovePosts removes "posts" edges to Post entities.
+func (_u *UserUpdate) RemovePosts(v ...*Post) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePostIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -129,6 +167,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPostsIDs(); len(nodes) > 0 && !_u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -190,9 +273,45 @@ func (_u *UserUpdateOne) SetUpdatedAt(v time.Time) *UserUpdateOne {
 	return _u
 }
 
+// AddPostIDs adds the "posts" edge to the Post entity by IDs.
+func (_u *UserUpdateOne) AddPostIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddPostIDs(ids...)
+	return _u
+}
+
+// AddPosts adds the "posts" edges to the Post entity.
+func (_u *UserUpdateOne) AddPosts(v ...*Post) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddPostIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
+}
+
+// ClearPosts clears all "posts" edges to the Post entity.
+func (_u *UserUpdateOne) ClearPosts() *UserUpdateOne {
+	_u.mutation.ClearPosts()
+	return _u
+}
+
+// RemovePostIDs removes the "posts" edge to Post entities by IDs.
+func (_u *UserUpdateOne) RemovePostIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemovePostIDs(ids...)
+	return _u
+}
+
+// RemovePosts removes "posts" edges to Post entities.
+func (_u *UserUpdateOne) RemovePosts(v ...*Post) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemovePostIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -281,6 +400,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedPostsIDs(); len(nodes) > 0 && !_u.mutation.PostsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues

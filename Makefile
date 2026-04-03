@@ -1,10 +1,13 @@
-.PHONY: all build test lint gen init clean help
+.PHONY: all build test lint gen proto init clean help
 
 # Binary output directory
 BIN_DIR := bin
 
 # Source command directory
 CMD_DIR := cmd
+
+# Additional protobuf include path (e.g., /opt/homebrew/include on macOS)
+PROTO_INCLUDE ?=
 
 # Get all subdirectories in cmd/
 CMDS := $(notdir $(wildcard $(CMD_DIR)/*))
@@ -17,9 +20,27 @@ init:
 	@echo "Installing dependencies..."
 	@go install golang.org/x/tools/cmd/goimports@latest
 	@go get -tool github.com/mazrean/kessoku/cmd/kessoku
+	@go get -tool github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+	@go get -tool github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+	@go get -tool google.golang.org/protobuf/cmd/protoc-gen-go
+	@go get -tool google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
+# Generate protobuf code
+proto:
+	@echo "Generating protobuf code..."
+	@protoc \
+		--plugin=protoc-gen-go=$$(go tool -n protoc-gen-go) \
+		--plugin=protoc-gen-go-grpc=$$(go tool -n protoc-gen-go-grpc) \
+		--plugin=protoc-gen-grpc-gateway=$$(go tool -n protoc-gen-grpc-gateway) \
+		--go_out=internal/pb --go_opt=paths=source_relative \
+		--go-grpc_out=internal/pb --go-grpc_opt=paths=source_relative \
+		--grpc-gateway_out=internal/pb --grpc-gateway_opt=paths=source_relative \
+		-I proto \
+		$(if $(PROTO_INCLUDE),-I $(PROTO_INCLUDE)) \
+		proto/post/v1/post.proto
 
 # Generate code
-gen:
+gen: proto
 	@echo "Generating code..."
 	@go generate ./...
 

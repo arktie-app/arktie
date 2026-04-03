@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -16,7 +17,7 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.New()).Default(func() uuid.UUID { return uuid.Must(uuid.NewV7()) }).Immutable(),
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID { return uuid.Must(uuid.NewV7()) }).Immutable(),
 		field.String("account_did").Unique(),
 		field.Bytes("encryption_key"),
 		field.Time("last_active_at").Default(time.Now),
@@ -27,5 +28,7 @@ func (User) Fields() []ent.Field {
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("posts", Post.Type),
+	}
 }

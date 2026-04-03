@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package post.v1;
+
+option go_package = "arktie.org/internal/pb/post/v1;postv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+message Post {
+  string id = 1;
+  string user_id = 2;
+  string at_url = 3;
+  optional string markdown_content = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreatePostRequest {
+  optional string markdown_content = 1;
+}
+
+message CreatePostResponse {
+  Post post = 1;
+}
+
+message GetPostRequest {
+  string id = 1;
+}
+
+message GetPostResponse {
+  Post post = 1;
+}
+
+message UpdatePostRequest {
+  string id = 1;
+  optional string markdown_content = 2;
+}
+
+message UpdatePostResponse {
+  Post post = 1;
+}
+
+message DeletePostRequest {
+  string id = 1;
+}
+
+message DeletePostResponse {}
+
+service PostService {
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
+    option (google.api.http) = {
+      post: "/api/posts"
+      body: "*"
+    };
+  }
+
+  rpc GetPost(GetPostRequest) returns (GetPostResponse) {
+    option (google.api.http) = {
+      get: "/api/posts/{id}"
+    };
+  }
+
+  rpc UpdatePost(UpdatePostRequest) returns (UpdatePostResponse) {
+    option (google.api.http) = {
+      put: "/api/posts/{id}"
+      body: "*"
+    };
+  }
+
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse) {
+    option (google.api.http) = {
+      delete: "/api/posts/{id}"
+    };
+  }
+}

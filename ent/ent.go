@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"sync"
 
+	"arktie.org/ent/post"
 	"arktie.org/ent/user"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -73,6 +74,7 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			post.Table: post.ValidColumn,
 			user.Table: user.ValidColumn,
 		})
 	})

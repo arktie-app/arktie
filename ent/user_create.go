@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"arktie.org/ent/post"
 	"arktie.org/ent/user"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -87,6 +88,21 @@ func (_c *UserCreate) SetNillableID(v *uuid.UUID) *UserCreate {
 		_c.SetID(*v)
 	}
 	return _c
+}
+
+// AddPostIDs adds the "posts" edge to the Post entity by IDs.
+func (_c *UserCreate) AddPostIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddPostIDs(ids...)
+	return _c
+}
+
+// AddPosts adds the "posts" edges to the Post entity.
+func (_c *UserCreate) AddPosts(v ...*Post) *UserCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddPostIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -213,6 +229,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := _c.mutation.PostsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PostsTable,
+			Columns: []string{user.PostsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
