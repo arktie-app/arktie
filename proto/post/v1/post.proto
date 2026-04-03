@@ -5,14 +5,15 @@ package post.v1;
 option go_package = "arktie.org/internal/pb/post/v1;postv1";
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 
 message Post {
   string id = 1;
   string user_id = 2;
   string at_url = 3;
   optional string markdown_content = 4;
-  string created_at = 5;
-  string updated_at = 6;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
 }
 
 message CreatePostRequest {

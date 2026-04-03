@@ -3,14 +3,15 @@ package ent
 import (
 	postv1 "arktie.org/internal/pb/post/v1"
 	"github.com/bluesky-social/indigo/atproto/syntax"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (p *Post) ToProto() *postv1.Post {
 	pb := &postv1.Post{
 		Id:        p.ID.String(),
 		UserId:    p.UserID.String(),
-		CreatedAt: p.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt: p.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		CreatedAt: timestamppb.New(p.CreatedAt),
+		UpdatedAt: timestamppb.New(p.UpdatedAt),
 	}
 
 	if p.AtURL != nil {
