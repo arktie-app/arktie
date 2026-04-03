@@ -20,8 +20,11 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
+      - name: Setup package
+        run: apt install -y protobuf-compiler
+
       - name: Install dependencies
-        run: go mod download
+        run: go mod download && make init
 
       - name: Check go mod tidy
         run: |
