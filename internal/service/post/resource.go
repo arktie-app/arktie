@@ -39,7 +39,7 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
 		if err := svc.event.Publisher.Publish("post.created", msg); err != nil {
 			slog.ErrorContext(ctx, "failed to publish post.create", liblogs.ErrAttr(err))
-			return nil, status.Error(codes.Internal, "failedc to publish post.create")
+			return nil, status.Error(codes.Internal, "failed to publish post.create")
 		}
 	} else {
 		return nil, status.Error(codes.Internal, "failed to encode json")

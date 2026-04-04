@@ -61,10 +61,3 @@ func (c *Event) initWatermill(cfg *data.Config) error {
 	return nil
 }
 
-//go:generate go tool moq -rm -out mock_message.go . MessagePublisher MessageSubscriber
-
-// MessagePublisher wraps watermill's message.Publisher for mock generation.
-type MessagePublisher = message.Publisher
-
-// MessageSubscriber wraps watermill's message.Subscriber for mock generation.
-type MessageSubscriber = message.Subscriber
