@@ -60,4 +60,3 @@ func (c *Event) initWatermill(cfg *data.Config) error {
 	c.Router = router
 	return nil
 }
-
