@@ -56,9 +56,9 @@ func newApp(config *data.Config) (*App, error) {
 		return s
 	})).Fn()(service0)
 	handler := kessoku.Provide(server.NewHandler).Fn()(config, database, oauthHandler, service0)
-	listener := kessoku.Provide(server.NewListener).Fn()(event, postSyncher)
-	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, handler http.Handler, _ *server.Listener) *App {
+	appListener := kessoku.Provide(server.NewListener).Fn()(event, postSyncher)
+	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, handler http.Handler, _ *server.AppListener) *App {
 		return &App{HTTP: &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}, Router: event.Router}
-	}).Fn()(config, event, handler, listener)
+	}).Fn()(config, event, handler, appListener)
 	return app, nil
 }

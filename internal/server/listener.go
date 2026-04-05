@@ -7,13 +7,13 @@ import (
 	"arktie.org/internal/service/post"
 )
 
-type Listener struct{}
+type AppListener struct{}
 
 func NewListener(
 	event *client.Event,
 
 	postSyncher PostSyncher,
-) *Listener {
+) *AppListener {
 	event.Router.AddConsumerHandler(
 		"post.created",
 		"post.created",
@@ -35,7 +35,7 @@ func NewListener(
 		postSyncher.Delete,
 	)
 
-	return &Listener{}
+	return &AppListener{}
 }
 
 type PostSyncher interface {
@@ -45,3 +45,38 @@ type PostSyncher interface {
 }
 
 var _ PostSyncher = &post.Service{}
+
+type FirehoseListener struct{}
+
+func NewFirehoseListener(
+	event *client.Event,
+
+	handler FirehosePostHandler,
+) *FirehoseListener {
+	event.Router.AddConsumerHandler(
+		"firehose.post.create",
+		"firehose.post.create",
+		event.Subscriber,
+		handler.HandlePost,
+	)
+
+	event.Router.AddConsumerHandler(
+		"firehose.post.update",
+		"firehose.post.update",
+		event.Subscriber,
+		handler.HandlePost,
+	)
+
+	event.Router.AddConsumerHandler(
+		"firehose.post.delete",
+		"firehose.post.delete",
+		event.Subscriber,
+		handler.HandlePost,
+	)
+
+	return &FirehoseListener{}
+}
+
+type FirehosePostHandler interface {
+	HandlePost(msg *message.Message) error
+}

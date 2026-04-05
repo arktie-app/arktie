@@ -62,7 +62,7 @@ var _ = kessoku.Inject[*App](
 	kessoku.Provide(server.NewListener),
 
 	// app
-	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, handler http.Handler, _ *server.Listener) *App {
+	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, handler http.Handler, _ *server.AppListener) *App {
 		return &App{
 			HTTP: &http.Server{
 				Addr:    cfg.Server.Addr,
