@@ -67,8 +67,14 @@ type DatabaseConfig struct {
 	Redis RedisConfig `mapstructure:"redis" default:""`
 }
 
+type FirehoseConfig struct {
+	RelayURL      *url.URL `mapstructure:"-"`
+	RelayURLValue string   `mapstructure:"relay_url" env:"FIREHOSE_RELAY_URL" default:"wss://relay1.us-east.bsky.network"`
+}
+
 type ServiceConfig struct {
 	Database DatabaseConfig `mapstructure:"database" default:""`
+	Firehose FirehoseConfig `mapstructure:"firehose" default:""`
 }
 
 type Config struct {
@@ -141,6 +147,11 @@ func NewConfig(name, version string, paths ...string) (*Config, error) {
 		return nil, err
 	} else {
 		cfg.App.URL = u
+	}
+	if u, err := url.Parse(cfg.Service.Firehose.RelayURLValue); err != nil {
+		return nil, err
+	} else {
+		cfg.Service.Firehose.RelayURL = u
 	}
 
 	return cfg, nil
