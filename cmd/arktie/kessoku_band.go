@@ -37,7 +37,7 @@ func newApp(config *data.Config) (*App, error) {
 	}
 	usecase := kessoku.Provide(post0.NewUsecase).Fn()(database)
 	usecase0 := kessoku.Provide(user.NewUsecase).Fn()(database)
-	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(oauth0)
+	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(config, oauth0)
 	postResource := kessoku.Bind[post.PostResource](kessoku.Provide(func(uc *post0.Usecase) post.PostResource {
 		return uc
 	})).Fn()(usecase)
