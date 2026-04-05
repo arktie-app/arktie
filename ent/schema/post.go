@@ -21,6 +21,7 @@ func (Post) Fields() []ent.Field {
 		field.UUID("user_id", uuid.UUID{}),
 		field.String("markdown_content").Nillable().Optional(),
 		field.String("at_url").Nillable().Optional(),
+		field.String("publish_from").Nillable().Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

@@ -71,6 +71,11 @@ func AtURL(v string) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldAtURL, v))
 }
 
+// PublishFrom applies equality check predicate on the "publish_from" field. It's identical to PublishFromEQ.
+func PublishFrom(v string) predicate.Post {
+	return predicate.Post(sql.FieldEQ(FieldPublishFrom, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldCreatedAt, v))
@@ -249,6 +254,81 @@ func AtURLEqualFold(v string) predicate.Post {
 // AtURLContainsFold applies the ContainsFold predicate on the "at_url" field.
 func AtURLContainsFold(v string) predicate.Post {
 	return predicate.Post(sql.FieldContainsFold(FieldAtURL, v))
+}
+
+// PublishFromEQ applies the EQ predicate on the "publish_from" field.
+func PublishFromEQ(v string) predicate.Post {
+	return predicate.Post(sql.FieldEQ(FieldPublishFrom, v))
+}
+
+// PublishFromNEQ applies the NEQ predicate on the "publish_from" field.
+func PublishFromNEQ(v string) predicate.Post {
+	return predicate.Post(sql.FieldNEQ(FieldPublishFrom, v))
+}
+
+// PublishFromIn applies the In predicate on the "publish_from" field.
+func PublishFromIn(vs ...string) predicate.Post {
+	return predicate.Post(sql.FieldIn(FieldPublishFrom, vs...))
+}
+
+// PublishFromNotIn applies the NotIn predicate on the "publish_from" field.
+func PublishFromNotIn(vs ...string) predicate.Post {
+	return predicate.Post(sql.FieldNotIn(FieldPublishFrom, vs...))
+}
+
+// PublishFromGT applies the GT predicate on the "publish_from" field.
+func PublishFromGT(v string) predicate.Post {
+	return predicate.Post(sql.FieldGT(FieldPublishFrom, v))
+}
+
+// PublishFromGTE applies the GTE predicate on the "publish_from" field.
+func PublishFromGTE(v string) predicate.Post {
+	return predicate.Post(sql.FieldGTE(FieldPublishFrom, v))
+}
+
+// PublishFromLT applies the LT predicate on the "publish_from" field.
+func PublishFromLT(v string) predicate.Post {
+	return predicate.Post(sql.FieldLT(FieldPublishFrom, v))
+}
+
+// PublishFromLTE applies the LTE predicate on the "publish_from" field.
+func PublishFromLTE(v string) predicate.Post {
+	return predicate.Post(sql.FieldLTE(FieldPublishFrom, v))
+}
+
+// PublishFromContains applies the Contains predicate on the "publish_from" field.
+func PublishFromContains(v string) predicate.Post {
+	return predicate.Post(sql.FieldContains(FieldPublishFrom, v))
+}
+
+// PublishFromHasPrefix applies the HasPrefix predicate on the "publish_from" field.
+func PublishFromHasPrefix(v string) predicate.Post {
+	return predicate.Post(sql.FieldHasPrefix(FieldPublishFrom, v))
+}
+
+// PublishFromHasSuffix applies the HasSuffix predicate on the "publish_from" field.
+func PublishFromHasSuffix(v string) predicate.Post {
+	return predicate.Post(sql.FieldHasSuffix(FieldPublishFrom, v))
+}
+
+// PublishFromIsNil applies the IsNil predicate on the "publish_from" field.
+func PublishFromIsNil() predicate.Post {
+	return predicate.Post(sql.FieldIsNull(FieldPublishFrom))
+}
+
+// PublishFromNotNil applies the NotNil predicate on the "publish_from" field.
+func PublishFromNotNil() predicate.Post {
+	return predicate.Post(sql.FieldNotNull(FieldPublishFrom))
+}
+
+// PublishFromEqualFold applies the EqualFold predicate on the "publish_from" field.
+func PublishFromEqualFold(v string) predicate.Post {
+	return predicate.Post(sql.FieldEqualFold(FieldPublishFrom, v))
+}
+
+// PublishFromContainsFold applies the ContainsFold predicate on the "publish_from" field.
+func PublishFromContainsFold(v string) predicate.Post {
+	return predicate.Post(sql.FieldContainsFold(FieldPublishFrom, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

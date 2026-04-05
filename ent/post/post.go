@@ -21,6 +21,8 @@ const (
 	FieldMarkdownContent = "markdown_content"
 	// FieldAtURL holds the string denoting the at_url field in the database.
 	FieldAtURL = "at_url"
+	// FieldPublishFrom holds the string denoting the publish_from field in the database.
+	FieldPublishFrom = "publish_from"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldMarkdownContent,
 	FieldAtURL,
+	FieldPublishFrom,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -90,6 +93,11 @@ func ByMarkdownContent(opts ...sql.OrderTermOption) OrderOption {
 // ByAtURL orders the results by the at_url field.
 func ByAtURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAtURL, opts...).ToFunc()
+}
+
+// ByPublishFrom orders the results by the publish_from field.
+func ByPublishFrom(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublishFrom, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

@@ -38,6 +38,7 @@ type PostMutation struct {
 	id               *uuid.UUID
 	markdown_content *string
 	at_url           *string
+	publish_from     *string
 	created_at       *time.Time
 	updated_at       *time.Time
 	clearedFields    map[string]struct{}
@@ -286,6 +287,55 @@ func (m *PostMutation) ResetAtURL() {
 	delete(m.clearedFields, post.FieldAtURL)
 }
 
+// SetPublishFrom sets the "publish_from" field.
+func (m *PostMutation) SetPublishFrom(s string) {
+	m.publish_from = &s
+}
+
+// PublishFrom returns the value of the "publish_from" field in the mutation.
+func (m *PostMutation) PublishFrom() (r string, exists bool) {
+	v := m.publish_from
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPublishFrom returns the old "publish_from" field's value of the Post entity.
+// If the Post object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PostMutation) OldPublishFrom(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPublishFrom is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPublishFrom requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPublishFrom: %w", err)
+	}
+	return oldValue.PublishFrom, nil
+}
+
+// ClearPublishFrom clears the value of the "publish_from" field.
+func (m *PostMutation) ClearPublishFrom() {
+	m.publish_from = nil
+	m.clearedFields[post.FieldPublishFrom] = struct{}{}
+}
+
+// PublishFromCleared returns if the "publish_from" field was cleared in this mutation.
+func (m *PostMutation) PublishFromCleared() bool {
+	_, ok := m.clearedFields[post.FieldPublishFrom]
+	return ok
+}
+
+// ResetPublishFrom resets all changes to the "publish_from" field.
+func (m *PostMutation) ResetPublishFrom() {
+	m.publish_from = nil
+	delete(m.clearedFields, post.FieldPublishFrom)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *PostMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -419,7 +469,7 @@ func (m *PostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PostMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.user != nil {
 		fields = append(fields, post.FieldUserID)
 	}
@@ -428,6 +478,9 @@ func (m *PostMutation) Fields() []string {
 	}
 	if m.at_url != nil {
 		fields = append(fields, post.FieldAtURL)
+	}
+	if m.publish_from != nil {
+		fields = append(fields, post.FieldPublishFrom)
 	}
 	if m.created_at != nil {
 		fields = append(fields, post.FieldCreatedAt)
@@ -449,6 +502,8 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.MarkdownContent()
 	case post.FieldAtURL:
 		return m.AtURL()
+	case post.FieldPublishFrom:
+		return m.PublishFrom()
 	case post.FieldCreatedAt:
 		return m.CreatedAt()
 	case post.FieldUpdatedAt:
@@ -468,6 +523,8 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldMarkdownContent(ctx)
 	case post.FieldAtURL:
 		return m.OldAtURL(ctx)
+	case post.FieldPublishFrom:
+		return m.OldPublishFrom(ctx)
 	case post.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case post.FieldUpdatedAt:
@@ -501,6 +558,13 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAtURL(v)
+		return nil
+	case post.FieldPublishFrom:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPublishFrom(v)
 		return nil
 	case post.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -552,6 +616,9 @@ func (m *PostMutation) ClearedFields() []string {
 	if m.FieldCleared(post.FieldAtURL) {
 		fields = append(fields, post.FieldAtURL)
 	}
+	if m.FieldCleared(post.FieldPublishFrom) {
+		fields = append(fields, post.FieldPublishFrom)
+	}
 	return fields
 }
 
@@ -572,6 +639,9 @@ func (m *PostMutation) ClearField(name string) error {
 	case post.FieldAtURL:
 		m.ClearAtURL()
 		return nil
+	case post.FieldPublishFrom:
+		m.ClearPublishFrom()
+		return nil
 	}
 	return fmt.Errorf("unknown Post nullable field %s", name)
 }
@@ -588,6 +658,9 @@ func (m *PostMutation) ResetField(name string) error {
 		return nil
 	case post.FieldAtURL:
 		m.ResetAtURL()
+		return nil
+	case post.FieldPublishFrom:
+		m.ResetPublishFrom()
 		return nil
 	case post.FieldCreatedAt:
 		m.ResetCreatedAt()

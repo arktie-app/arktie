@@ -84,6 +84,26 @@ func (_u *PostUpdate) ClearAtURL() *PostUpdate {
 	return _u
 }
 
+// SetPublishFrom sets the "publish_from" field.
+func (_u *PostUpdate) SetPublishFrom(v string) *PostUpdate {
+	_u.mutation.SetPublishFrom(v)
+	return _u
+}
+
+// SetNillablePublishFrom sets the "publish_from" field if the given value is not nil.
+func (_u *PostUpdate) SetNillablePublishFrom(v *string) *PostUpdate {
+	if v != nil {
+		_u.SetPublishFrom(*v)
+	}
+	return _u
+}
+
+// ClearPublishFrom clears the value of the "publish_from" field.
+func (_u *PostUpdate) ClearPublishFrom() *PostUpdate {
+	_u.mutation.ClearPublishFrom()
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PostUpdate) SetUpdatedAt(v time.Time) *PostUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -173,6 +193,12 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.AtURLCleared() {
 		_spec.ClearField(post.FieldAtURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.PublishFrom(); ok {
+		_spec.SetField(post.FieldPublishFrom, field.TypeString, value)
+	}
+	if _u.mutation.PublishFromCleared() {
+		_spec.ClearField(post.FieldPublishFrom, field.TypeString)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
@@ -277,6 +303,26 @@ func (_u *PostUpdateOne) SetNillableAtURL(v *string) *PostUpdateOne {
 // ClearAtURL clears the value of the "at_url" field.
 func (_u *PostUpdateOne) ClearAtURL() *PostUpdateOne {
 	_u.mutation.ClearAtURL()
+	return _u
+}
+
+// SetPublishFrom sets the "publish_from" field.
+func (_u *PostUpdateOne) SetPublishFrom(v string) *PostUpdateOne {
+	_u.mutation.SetPublishFrom(v)
+	return _u
+}
+
+// SetNillablePublishFrom sets the "publish_from" field if the given value is not nil.
+func (_u *PostUpdateOne) SetNillablePublishFrom(v *string) *PostUpdateOne {
+	if v != nil {
+		_u.SetPublishFrom(*v)
+	}
+	return _u
+}
+
+// ClearPublishFrom clears the value of the "publish_from" field.
+func (_u *PostUpdateOne) ClearPublishFrom() *PostUpdateOne {
+	_u.mutation.ClearPublishFrom()
 	return _u
 }
 
@@ -399,6 +445,12 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	}
 	if _u.mutation.AtURLCleared() {
 		_spec.ClearField(post.FieldAtURL, field.TypeString)
+	}
+	if value, ok := _u.mutation.PublishFrom(); ok {
+		_spec.SetField(post.FieldPublishFrom, field.TypeString, value)
+	}
+	if _u.mutation.PublishFromCleared() {
+		_spec.ClearField(post.FieldPublishFrom, field.TypeString)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(post.FieldUpdatedAt, field.TypeTime, value)
