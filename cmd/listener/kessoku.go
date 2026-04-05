@@ -8,12 +8,15 @@ import (
 	"arktie.org/internal/data"
 	dataclient "arktie.org/internal/data/client"
 	"arktie.org/internal/server"
+	"arktie.org/internal/service/post"
 )
 
 //nolint:unused
 var _ = kessoku.Inject[*App](
 	"newApp",
 	kessoku.Provide(dataclient.NewEvent),
+
+	kessoku.Provide(post.NewFirehoseService),
 
 	kessoku.Provide(func() *FirehoseLogHandler { return &FirehoseLogHandler{} }),
 	kessoku.Bind[server.FirehosePostHandler](
@@ -22,10 +25,11 @@ var _ = kessoku.Inject[*App](
 
 	kessoku.Provide(server.NewFirehoseListener),
 
-	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, _ *server.FirehoseListener) *App {
+	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, firehose *post.FirehoseService, _ *server.FirehoseListener) *App {
 		return &App{
-			Config: cfg,
-			Event:  event,
+			Config:   cfg,
+			Event:    event,
+			Firehose: firehose,
 		}
 	}),
 )

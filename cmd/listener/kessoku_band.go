@@ -6,6 +6,7 @@ import (
 	"arktie.org/internal/data"
 	"arktie.org/internal/data/client"
 	"arktie.org/internal/server"
+	"arktie.org/internal/service/post"
 	"github.com/mazrean/kessoku"
 )
 
@@ -22,9 +23,10 @@ func newApp(config *data.Config) (*App, error) {
 	firehosePostHandler := kessoku.Bind[server.FirehosePostHandler](kessoku.Provide(func(h *FirehoseLogHandler) server.FirehosePostHandler {
 		return h
 	})).Fn()(firehoseLogHandler)
+	firehoseService := kessoku.Provide(post.NewFirehoseService).Fn()(config, event)
 	firehoseListener := kessoku.Provide(server.NewFirehoseListener).Fn()(event, firehosePostHandler)
-	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, _ *server.FirehoseListener) *App {
-		return &App{Config: cfg, Event: event}
-	}).Fn()(config, event, firehoseListener)
+	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, firehose *post.FirehoseService, _ *server.FirehoseListener) *App {
+		return &App{Config: cfg, Event: event, Firehose: firehose}
+	}).Fn()(config, event, firehoseService, firehoseListener)
 	return app, nil
 }
