@@ -25,7 +25,7 @@ func (svc *Service) Create(msg *message.Message) error {
 		accountDID, sessionID,
 		"app.arktie.post",
 		p.ID.String(),
-		p.ToPDSRecord().ToMap(svc.cfg.App.URL.String()),
+		p.ToPDSRecord(),
 	)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (svc *Service) Update(msg *message.Message) error {
 		accountDID, sessionID,
 		"app.arktie.post",
 		p.ID.String(),
-		p.ToPDSRecord().ToMap(svc.cfg.App.URL.String()),
+		p.ToPDSRecord(),
 	)
 	if err != nil {
 		return err

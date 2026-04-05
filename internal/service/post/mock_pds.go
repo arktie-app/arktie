@@ -4,6 +4,7 @@
 package post
 
 import (
+	"arktie.org/internal/data"
 	"context"
 	"sync"
 )
@@ -21,7 +22,7 @@ var _ PDSRecordAPI = &PDSRecordAPIMock{}
 //			DeleteRecordFunc: func(ctx context.Context, accountDID string, sessionID string, collection string, rkey string) error {
 //				panic("mock out the DeleteRecord method")
 //			},
-//			PutRecordFunc: func(ctx context.Context, accountDID string, sessionID string, collection string, rkey string, record map[string]any) (string, error) {
+//			PutRecordFunc: func(ctx context.Context, accountDID string, sessionID string, collection string, rkey string, record *data.PDSRecord) (string, error) {
 //				panic("mock out the PutRecord method")
 //			},
 //		}
@@ -35,7 +36,7 @@ type PDSRecordAPIMock struct {
 	DeleteRecordFunc func(ctx context.Context, accountDID string, sessionID string, collection string, rkey string) error
 
 	// PutRecordFunc mocks the PutRecord method.
-	PutRecordFunc func(ctx context.Context, accountDID string, sessionID string, collection string, rkey string, record map[string]any) (string, error)
+	PutRecordFunc func(ctx context.Context, accountDID string, sessionID string, collection string, rkey string, record *data.PDSRecord) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -65,7 +66,7 @@ type PDSRecordAPIMock struct {
 			// Rkey is the rkey argument value.
 			Rkey string
 			// Record is the record argument value.
-			Record map[string]any
+			Record *data.PDSRecord
 		}
 	}
 	lockDeleteRecord sync.RWMutex
@@ -121,7 +122,7 @@ func (mock *PDSRecordAPIMock) DeleteRecordCalls() []struct {
 }
 
 // PutRecord calls PutRecordFunc.
-func (mock *PDSRecordAPIMock) PutRecord(ctx context.Context, accountDID string, sessionID string, collection string, rkey string, record map[string]any) (string, error) {
+func (mock *PDSRecordAPIMock) PutRecord(ctx context.Context, accountDID string, sessionID string, collection string, rkey string, record *data.PDSRecord) (string, error) {
 	if mock.PutRecordFunc == nil {
 		panic("PDSRecordAPIMock.PutRecordFunc: method is nil but PDSRecordAPI.PutRecord was just called")
 	}
@@ -131,7 +132,7 @@ func (mock *PDSRecordAPIMock) PutRecord(ctx context.Context, accountDID string, 
 		SessionID  string
 		Collection string
 		Rkey       string
-		Record     map[string]any
+		Record     *data.PDSRecord
 	}{
 		Ctx:        ctx,
 		AccountDID: accountDID,
@@ -156,7 +157,7 @@ func (mock *PDSRecordAPIMock) PutRecordCalls() []struct {
 	SessionID  string
 	Collection string
 	Rkey       string
-	Record     map[string]any
+	Record     *data.PDSRecord
 } {
 	var calls []struct {
 		Ctx        context.Context
@@ -164,7 +165,7 @@ func (mock *PDSRecordAPIMock) PutRecordCalls() []struct {
 		SessionID  string
 		Collection string
 		Rkey       string
-		Record     map[string]any
+		Record     *data.PDSRecord
 	}
 	mock.lockPutRecord.RLock()
 	calls = mock.calls.PutRecord

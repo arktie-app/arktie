@@ -85,7 +85,7 @@ func newSyncherMessage(t *testing.T, payload []byte, accountDID, sessionID strin
 
 func TestSyncher_Create_Success(t *testing.T) {
 	pds := &PDSRecordAPIMock{
-		PutRecordFunc: func(_ context.Context, accountDID, sessionID, collection, rkey string, _ map[string]any) (string, error) {
+		PutRecordFunc: func(_ context.Context, accountDID, sessionID, collection, rkey string, _ *data.PDSRecord) (string, error) {
 			if collection != "app.arktie.post" {
 				t.Errorf("expected collection app.arktie.post, got %s", collection)
 			}
@@ -128,7 +128,7 @@ func TestSyncher_Create_Success(t *testing.T) {
 
 func TestSyncher_Create_PutRecordError(t *testing.T) {
 	pds := &PDSRecordAPIMock{
-		PutRecordFunc: func(_ context.Context, _, _, _, _ string, _ map[string]any) (string, error) {
+		PutRecordFunc: func(_ context.Context, _, _, _, _ string, _ *data.PDSRecord) (string, error) {
 			return "", errors.New("pds error")
 		},
 	}
@@ -159,7 +159,7 @@ func TestSyncher_Create_InvalidPayload(t *testing.T) {
 
 func TestSyncher_Create_EmptyURI_SkipsUpdate(t *testing.T) {
 	pds := &PDSRecordAPIMock{
-		PutRecordFunc: func(_ context.Context, _, _, _, _ string, _ map[string]any) (string, error) {
+		PutRecordFunc: func(_ context.Context, _, _, _, _ string, _ *data.PDSRecord) (string, error) {
 			return "", nil
 		},
 	}
@@ -185,7 +185,7 @@ func TestSyncher_Create_EmptyURI_SkipsUpdate(t *testing.T) {
 
 func TestSyncher_Update_Success(t *testing.T) {
 	pds := &PDSRecordAPIMock{
-		PutRecordFunc: func(_ context.Context, _, _, collection, rkey string, _ map[string]any) (string, error) {
+		PutRecordFunc: func(_ context.Context, _, _, collection, rkey string, _ *data.PDSRecord) (string, error) {
 			if collection != "app.arktie.post" {
 				t.Errorf("expected collection app.arktie.post, got %s", collection)
 			}
@@ -220,7 +220,7 @@ func TestSyncher_Update_Success(t *testing.T) {
 
 func TestSyncher_Update_PutRecordError(t *testing.T) {
 	pds := &PDSRecordAPIMock{
-		PutRecordFunc: func(_ context.Context, _, _, _, _ string, _ map[string]any) (string, error) {
+		PutRecordFunc: func(_ context.Context, _, _, _, _ string, _ *data.PDSRecord) (string, error) {
 			return "", errors.New("pds error")
 		},
 	}

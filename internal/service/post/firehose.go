@@ -75,8 +75,7 @@ func (s *FirehoseService) handleCommit(evt *comatproto.SyncSubscribeRepos_Commit
 				continue
 			}
 
-			from, _ := record["from"].(string)
-			if shouldIgnore(from, s.cfg.App.URL) {
+			if shouldIgnore(record.PublishedFrom, s.cfg.App.URL) {
 				continue
 			}
 
@@ -128,7 +127,7 @@ func shouldIgnore(from string, appURL *url.URL) bool {
 	return false
 }
 
-func extractRecord(evt *comatproto.SyncSubscribeRepos_Commit, op *comatproto.SyncSubscribeRepos_RepoOp) (map[string]any, error) {
+func extractRecord(evt *comatproto.SyncSubscribeRepos_Commit, op *comatproto.SyncSubscribeRepos_RepoOp) (*data.PDSRecord, error) {
 	if len(evt.Blocks) == 0 || op.Cid == nil {
 		return nil, nil
 	}
@@ -153,12 +152,22 @@ func extractRecord(evt *comatproto.SyncSubscribeRepos_Commit, op *comatproto.Syn
 			continue
 		}
 
-		var rec map[string]any
-		if err := cbornode.DecodeInto(blk.RawData(), &rec); err != nil {
+		var raw map[string]any
+		if err := cbornode.DecodeInto(blk.RawData(), &raw); err != nil {
 			return nil, fmt.Errorf("failed to decode CBOR record: %w", err)
 		}
 
-		return rec, nil
+		jsonBytes, err := json.Marshal(raw)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal record to JSON: %w", err)
+		}
+
+		var rec data.PDSRecord
+		if err := json.Unmarshal(jsonBytes, &rec); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal record: %w", err)
+		}
+
+		return &rec, nil
 	}
 
 	return nil, nil

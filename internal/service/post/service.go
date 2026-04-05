@@ -55,7 +55,7 @@ var _ PostResource = &ucpost.Usecase{}
 
 // PDSRecordAPI abstracts PDS record operations for testability.
 type PDSRecordAPI interface {
-	PutRecord(ctx context.Context, accountDID, sessionID, collection, rkey string, record map[string]any) (uri string, err error)
+	PutRecord(ctx context.Context, accountDID, sessionID, collection, rkey string, record *data.PDSRecord) (uri string, err error)
 	DeleteRecord(ctx context.Context, accountDID, sessionID, collection, rkey string) error
 }
 

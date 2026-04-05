@@ -24,7 +24,7 @@ func NewPDSRecord(cfg *data.Config, oauth *client.OAuth) *PDSRecord {
 	}
 }
 
-func (p *PDSRecord) PutRecord(ctx context.Context, accountDID, sessionID, collection, rkey string, record map[string]any) (string, error) {
+func (p *PDSRecord) PutRecord(ctx context.Context, accountDID, sessionID, collection, rkey string, record *data.PDSRecord) (string, error) {
 	did, err := syntax.ParseDID(accountDID)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse DID %s: %w", accountDID, err)
@@ -37,13 +37,13 @@ func (p *PDSRecord) PutRecord(ctx context.Context, accountDID, sessionID, collec
 
 	apiClient := sess.APIClient()
 
-	record["publish_from"] = p.cfg.App.URL.String()
+	recordMap := record.ToMap(p.cfg.App.URL.String())
 
 	input := &agnostic.RepoPutRecord_Input{
 		Repo:       apiClient.AccountDID.String(),
 		Collection: collection,
 		Rkey:       rkey,
-		Record:     record,
+		Record:     recordMap,
 	}
 
 	var out agnostic.RepoPutRecord_Output
