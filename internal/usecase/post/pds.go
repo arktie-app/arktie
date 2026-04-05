@@ -2,9 +2,6 @@ package post
 
 import (
 	"context"
-	"crypto/ed25519"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 
 	"github.com/bluesky-social/indigo/api/agnostic"
@@ -40,13 +37,7 @@ func (p *PDSRecord) PutRecord(ctx context.Context, accountDID, sessionID, collec
 
 	apiClient := sess.APIClient()
 
-	payload, err := json.Marshal(record)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal record for signing: %w", err)
-	}
-	sig := ed25519.Sign(p.cfg.App.SigningPrivateKey, payload)
-	record["signature"] = base64.StdEncoding.EncodeToString(sig)
-	record["from"] = p.cfg.App.URL.String()
+	record["publish_from"] = p.cfg.App.URL.String()
 
 	input := &agnostic.RepoPutRecord_Input{
 		Repo:       apiClient.AccountDID.String(),

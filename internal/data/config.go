@@ -1,13 +1,9 @@
 package data
 
 import (
-	"crypto/ed25519"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/pem"
 	"errors"
-	"fmt"
 	"io/fs"
 	"net/url"
 	"os"
@@ -28,11 +24,6 @@ type AppConfig struct {
 
 	Key      []byte `mapstructure:"-"`
 	KeyValue string `mapstructure:"key" env:"APP_KEY"`
-
-	SigningPrivateKey      ed25519.PrivateKey `mapstructure:"-"`
-	SigningPrivateKeyValue string             `mapstructure:"sign_private_key" env:"SIGN_PRIVATE_KEY"`
-	SigningPublicKey       ed25519.PublicKey  `mapstructure:""`
-	SigningPublicKeyValue  string             `mapstructure:"sign_public_key" env:"SIGN_PUBLIC_KEY"`
 }
 
 func (c AppConfig) IsLocal() bool {
@@ -136,13 +127,6 @@ func NewConfig(name, version string, paths ...string) (*Config, error) {
 		cfg.App.Key = key
 	}
 
-	if pub, priv, err := parseSignKey(cfg.App.SigningPublicKeyValue, cfg.App.SigningPrivateKeyValue); err != nil {
-		return nil, err
-	} else {
-		cfg.App.SigningPublicKey = pub
-		cfg.App.SigningPrivateKey = priv
-	}
-
 	if u, err := url.Parse(cfg.App.URLValue); err != nil {
 		return nil, err
 	} else {
@@ -172,43 +156,4 @@ func parseKey(value string) (ret []byte, err error) {
 	}
 
 	return []byte(value), nil
-}
-
-func parseSignKey(pubv, priv string) (ed25519.PublicKey, ed25519.PrivateKey, error) {
-	pubBlock, _ := pem.Decode([]byte(pubv))
-	if pubBlock == nil {
-		return nil, nil, errors.New("failed to decode public key PEM")
-	}
-
-	pubParsed, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
-	if err != nil {
-		return nil, nil, fmt.Errorf("parse public key: %w", err)
-	}
-
-	pubkey, ok := pubParsed.(ed25519.PublicKey)
-	if !ok {
-		return nil, nil, errors.New("public key is not ed25519")
-	}
-
-	privBlock, _ := pem.Decode([]byte(priv))
-	if privBlock == nil {
-		return nil, nil, errors.New("failed to decode private key PEM")
-	}
-
-	privParsed, err := x509.ParsePKCS8PrivateKey(privBlock.Bytes)
-	if err != nil {
-		return nil, nil, fmt.Errorf("parse private key: %w", err)
-	}
-
-	privkey, ok := privParsed.(ed25519.PrivateKey)
-	if !ok {
-		return nil, nil, errors.New("private key is not ed25519")
-	}
-
-	msg := []byte("validation-test")
-	if !ed25519.Verify(pubkey, msg, ed25519.Sign(privkey, msg)) {
-		return nil, nil, errors.New("signing key validation error")
-	}
-
-	return pubkey, privkey, nil
 }

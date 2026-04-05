@@ -4,19 +4,3 @@ app:
   key: "hex:ed864beb820c49438a995c3e158245da745eb0a9fbb0e951acad39efbf28d060"
   # openssl rand 32 -base64
   #key: "base64:IeJA9b3jwUITRas3LzdFuO6qEPtTxhTtEjK2qy++hqc="
-
-  # openssl genpkey -algorithm ed25519 -out private.pem
-  # !!!DANGEROUSLY: MUST NOT use plain text as private key in production!!!
-  # Note: it doesn't support ed25519 algorithm in macOS with LibreSSL 3.3.6, use openssl instead
-  sign_private_key: |
-    -----BEGIN PRIVATE KEY-----
-    MC4CAQAwBQYDK2VwBCIEIEl2+hnA25yVEyolygeXfhRd5FklOWV+kRUWDBwcHKP8
-    -----END PRIVATE KEY-----
-
-  # openssl pkey -in private.pem -pubout -out public.pem
-  # Note: it doesn't support ed25519 algorithm in macOS with LibreSSL 3.3.6, use openssl instead
-  sign_public_key: |
-    -----BEGIN PUBLIC KEY-----
-    MCowBQYDK2VwAyEA8DbBWySUJCUmd8goJANY+UwVmWF+U6Vctz5qwjuoiBU=
-    -----END PUBLIC KEY-----
-

@@ -39,11 +39,6 @@ func NewHandler(
 			libhttp.WriteJSON(w, http.StatusOK, middleware.UserFromContext(r.Context()))
 		})
 
-	mux.HandleFunc("GET /.well-known/signing-key.pem", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/x-pem-file")
-		w.Write([]byte(cfg.App.SigningPublicKeyValue))
-	})
-
 	gwMux := runtime.NewServeMux()
 	postv1.RegisterPostServiceHandlerServer(context.Background(), gwMux, postSvc)
 

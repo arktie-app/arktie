@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"net/url"
 	"testing"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 
 	"arktie.org/ent"
 	"arktie.org/ent/enttest"
+	"arktie.org/internal/data"
 	"arktie.org/internal/data/client"
 )
 
@@ -35,7 +37,9 @@ func setupSyncherTest(t *testing.T, pds *PDSRecordAPIMock) (*Service, *ent.Clien
 	)
 	t.Cleanup(func() { entClient.Close() })
 
+	appURL, _ := url.Parse("http://localhost:3000")
 	svc := &Service{
+		cfg: &data.Config{App: data.AppConfig{URL: appURL}},
 		db:  &client.Database{Ent: entClient},
 		pds: pds,
 	}

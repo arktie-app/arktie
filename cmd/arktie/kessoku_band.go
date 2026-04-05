@@ -48,7 +48,7 @@ func newApp(config *data.Config) (*App, error) {
 		return p
 	})).Fn()(pdsrecord)
 	service := kessoku.Provide(oauth.NewService).Fn()(config, oauth0, userAttempter)
-	service0 := kessoku.Provide(post.NewService).Fn()(postResource, pdsrecordAPI, database, event)
+	service0 := kessoku.Provide(post.NewService).Fn()(config, database, event, postResource, pdsrecordAPI)
 	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
 		return s
 	})).Fn()(service)

@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"arktie.org/ent"
+	"arktie.org/internal/data"
 	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/libjwt"
 	postv1 "arktie.org/internal/pb/post/v1"
@@ -42,9 +43,15 @@ func authedCtx(claim *libjwt.Claim) context.Context {
 }
 
 func newTestService(resource *PostResourceMock, publisher *client.MessagePublisherMock) *Service {
-	return NewService(resource, &PDSRecordAPIMock{}, &client.Database{}, &client.Event{
-		Publisher: publisher,
-	})
+	return NewService(
+		&data.Config{},
+		&client.Database{},
+		&client.Event{
+			Publisher: publisher,
+		},
+		resource,
+		&PDSRecordAPIMock{},
+	)
 }
 
 func newPost(id, userID uuid.UUID, content *string) *ent.Post {

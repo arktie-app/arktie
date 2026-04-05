@@ -20,7 +20,13 @@ func (svc *Service) Create(msg *message.Message) error {
 	accountDID := msg.Metadata.Get("account_did")
 	sessionID := msg.Metadata.Get("session_id")
 
-	uri, err := svc.pds.PutRecord(msg.Context(), accountDID, sessionID, "app.arktie.post", p.ID.String(), p.ToPDSRecord())
+	uri, err := svc.pds.PutRecord(
+		msg.Context(),
+		accountDID, sessionID,
+		"app.arktie.post",
+		p.ID.String(),
+		p.ToPDSRecord().ToMap(svc.cfg.App.URL.String()),
+	)
 	if err != nil {
 		return err
 	}
@@ -44,7 +50,13 @@ func (svc *Service) Update(msg *message.Message) error {
 	accountDID := msg.Metadata.Get("account_did")
 	sessionID := msg.Metadata.Get("session_id")
 
-	uri, err := svc.pds.PutRecord(msg.Context(), accountDID, sessionID, "app.arktie.post", p.ID.String(), p.ToPDSRecord())
+	uri, err := svc.pds.PutRecord(
+		msg.Context(),
+		accountDID, sessionID,
+		"app.arktie.post",
+		p.ID.String(),
+		p.ToPDSRecord().ToMap(svc.cfg.App.URL.String()),
+	)
 	if err != nil {
 		return err
 	}

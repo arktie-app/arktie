@@ -1,6 +1,7 @@
 package ent
 
 import (
+	"arktie.org/internal/data"
 	postv1 "arktie.org/internal/pb/post/v1"
 	"github.com/bluesky-social/indigo/atproto/syntax"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -24,13 +25,12 @@ func (p *Post) ToProto() *postv1.Post {
 	return pb
 }
 
-func (p *Post) ToPDSRecord() map[string]any {
-	return map[string]any{
-		"$type":        "app.arktie.post",
-		"version":      "2026-04-03",
-		"content":      p.MarkdownContent,
-		"created_at":   syntax.Datetime(p.CreatedAt.Format(syntax.AtprotoDatetimeLayout)),
-		"updated_at":   syntax.Datetime(p.UpdatedAt.Format(syntax.AtprotoDatetimeLayout)),
-		"published_at": syntax.DatetimeNow(),
+func (p *Post) ToPDSRecord() *data.PDSRecord {
+	return &data.PDSRecord{
+		Version:     "2026-04-05",
+		Content:     p.MarkdownContent,
+		CreatedAt:   syntax.Datetime(p.CreatedAt.Format(syntax.AtprotoDatetimeLayout)),
+		UpdatedAt:   syntax.Datetime(p.UpdatedAt.Format(syntax.AtprotoDatetimeLayout)),
+		PublishedAt: syntax.DatetimeNow(),
 	}
 }
