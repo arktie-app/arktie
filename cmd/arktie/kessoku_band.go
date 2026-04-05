@@ -4,6 +4,7 @@ package main
 
 import (
 	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/oauth"
 	"arktie.org/internal/service/post"
@@ -17,35 +18,47 @@ import (
 
 func newApp(config *data.Config) (*App, error) {
 	var err error
-	client, err := kessoku.Provide(data.NewClient).Fn()(config)
+	event, err := kessoku.Provide(client.NewEvent).Fn()(config)
 	if err != nil {
 		var zero *App
 		return zero, err
 	}
-	usecase := kessoku.Provide(post0.NewUsecase).Fn()(client)
-	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(client)
-	usecase0 := kessoku.Provide(user.NewUsecase).Fn()(client)
+	var err0 error
+	database, err0 := kessoku.Provide(client.NewDatabase).Fn()(config)
+	if err0 != nil {
+		var zero *App
+		return zero, err0
+	}
+	var err1 error
+	oauth0, err1 := kessoku.Provide(client.NewOAuth).Fn()(config, database)
+	if err1 != nil {
+		var zero *App
+		return zero, err1
+	}
+	usecase := kessoku.Provide(post0.NewUsecase).Fn()(database)
+	usecase0 := kessoku.Provide(user.NewUsecase).Fn()(database)
+	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(oauth0)
 	postResource := kessoku.Bind[post.PostResource](kessoku.Provide(func(uc *post0.Usecase) post.PostResource {
 		return uc
 	})).Fn()(usecase)
-	pdsrecordAPI := kessoku.Bind[post.PDSRecordAPI](kessoku.Provide(func(p *post0.PDSRecord) post.PDSRecordAPI {
-		return p
-	})).Fn()(pdsrecord)
 	userAttempter := kessoku.Bind[oauth.UserAttempter](kessoku.Provide(func(uc *user.Usecase) oauth.UserAttempter {
 		return uc
 	})).Fn()(usecase0)
-	service := kessoku.Provide(post.NewService).Fn()(postResource, pdsrecordAPI, client)
-	service0 := kessoku.Provide(oauth.NewService).Fn()(config, client, userAttempter)
-	postSyncher := kessoku.Bind[server.PostSyncher](kessoku.Provide(func(s *post.Service) server.PostSyncher {
-		return s
-	})).Fn()(service)
+	pdsrecordAPI := kessoku.Bind[post.PDSRecordAPI](kessoku.Provide(func(p *post0.PDSRecord) post.PDSRecordAPI {
+		return p
+	})).Fn()(pdsrecord)
+	service := kessoku.Provide(oauth.NewService).Fn()(config, oauth0, userAttempter)
+	service0 := kessoku.Provide(post.NewService).Fn()(postResource, pdsrecordAPI, database, event)
 	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
 		return s
+	})).Fn()(service)
+	postSyncher := kessoku.Bind[server.PostSyncher](kessoku.Provide(func(s *post.Service) server.PostSyncher {
+		return s
 	})).Fn()(service0)
-	listener := kessoku.Provide(server.NewListener).Fn()(client, postSyncher)
-	handler := kessoku.Provide(server.NewHandler).Fn()(config, client, oauthHandler, service)
-	app := kessoku.Provide(func(cfg *data.Config, client *data.Client, handler http.Handler, _ *server.Listener) *App {
-		return &App{HTTP: &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}, Router: client.Router}
-	}).Fn()(config, client, handler, listener)
+	handler := kessoku.Provide(server.NewHandler).Fn()(config, database, oauthHandler, service0)
+	listener := kessoku.Provide(server.NewListener).Fn()(event, postSyncher)
+	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, handler http.Handler, _ *server.Listener) *App {
+		return &App{HTTP: &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}, Router: event.Router}
+	}).Fn()(config, event, handler, listener)
 	return app, nil
 }

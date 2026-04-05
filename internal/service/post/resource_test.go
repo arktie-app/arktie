@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"arktie.org/ent"
-	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/libjwt"
 	postv1 "arktie.org/internal/pb/post/v1"
 	"arktie.org/internal/server/middleware"
@@ -41,8 +41,8 @@ func authedCtx(claim *libjwt.Claim) context.Context {
 	return middleware.ContextWithUser(context.Background(), claim)
 }
 
-func newTestService(resource *PostResourceMock, publisher *data.MessagePublisherMock) *Service {
-	return NewService(resource, &PDSRecordAPIMock{}, &data.Client{
+func newTestService(resource *PostResourceMock, publisher *client.MessagePublisherMock) *Service {
+	return NewService(resource, &PDSRecordAPIMock{}, &client.Database{}, &client.Event{
 		Publisher: publisher,
 	})
 }
@@ -72,7 +72,7 @@ func TestCreatePost_Success(t *testing.T) {
 			return post, nil
 		},
 	}
-	publisher := &data.MessagePublisherMock{
+	publisher := &client.MessagePublisherMock{
 		PublishFunc: func(topic string, msgs ...*message.Message) error {
 			if topic != "post.created" {
 				t.Errorf("expected topic post.created, got %s", topic)
@@ -101,7 +101,7 @@ func TestCreatePost_Success(t *testing.T) {
 }
 
 func TestCreatePost_Unauthenticated(t *testing.T) {
-	svc := newTestService(&PostResourceMock{}, &data.MessagePublisherMock{})
+	svc := newTestService(&PostResourceMock{}, &client.MessagePublisherMock{})
 
 	_, err := svc.CreatePost(context.Background(), &postv1.CreatePostRequest{})
 
@@ -116,7 +116,7 @@ func TestCreatePost_ResourceError(t *testing.T) {
 			return nil, errors.New("db error")
 		},
 	}
-	svc := newTestService(resource, &data.MessagePublisherMock{})
+	svc := newTestService(resource, &client.MessagePublisherMock{})
 
 	_, err := svc.CreatePost(authedCtx(testClaim()), &postv1.CreatePostRequest{})
 
@@ -132,7 +132,7 @@ func TestCreatePost_PublishError(t *testing.T) {
 			return newPost(testPostID, testUserID, &content), nil
 		},
 	}
-	publisher := &data.MessagePublisherMock{
+	publisher := &client.MessagePublisherMock{
 		PublishFunc: func(_ string, _ ...*message.Message) error {
 			return errors.New("publish failed")
 		},
@@ -162,7 +162,7 @@ func TestGetPost_Success(t *testing.T) {
 			return post, nil
 		},
 	}
-	svc := newTestService(resource, &data.MessagePublisherMock{})
+	svc := newTestService(resource, &client.MessagePublisherMock{})
 
 	resp, err := svc.GetPost(context.Background(), &postv1.GetPostRequest{Id: testPostID.String()})
 
@@ -175,7 +175,7 @@ func TestGetPost_Success(t *testing.T) {
 }
 
 func TestGetPost_InvalidID(t *testing.T) {
-	svc := newTestService(&PostResourceMock{}, &data.MessagePublisherMock{})
+	svc := newTestService(&PostResourceMock{}, &client.MessagePublisherMock{})
 
 	_, err := svc.GetPost(context.Background(), &postv1.GetPostRequest{Id: "not-a-uuid"})
 
@@ -190,7 +190,7 @@ func TestGetPost_NotFound(t *testing.T) {
 			return nil, &ent.NotFoundError{}
 		},
 	}
-	svc := newTestService(resource, &data.MessagePublisherMock{})
+	svc := newTestService(resource, &client.MessagePublisherMock{})
 
 	_, err := svc.GetPost(context.Background(), &postv1.GetPostRequest{Id: testPostID.String()})
 
@@ -216,7 +216,7 @@ func TestUpdatePost_Success(t *testing.T) {
 			return post, nil
 		},
 	}
-	publisher := &data.MessagePublisherMock{
+	publisher := &client.MessagePublisherMock{
 		PublishFunc: func(topic string, _ ...*message.Message) error {
 			if topic != "post.updated" {
 				t.Errorf("expected topic post.updated, got %s", topic)
@@ -240,7 +240,7 @@ func TestUpdatePost_Success(t *testing.T) {
 }
 
 func TestUpdatePost_Unauthenticated(t *testing.T) {
-	svc := newTestService(&PostResourceMock{}, &data.MessagePublisherMock{})
+	svc := newTestService(&PostResourceMock{}, &client.MessagePublisherMock{})
 
 	_, err := svc.UpdatePost(context.Background(), &postv1.UpdatePostRequest{Id: testPostID.String()})
 
@@ -255,7 +255,7 @@ func TestUpdatePost_NotFound(t *testing.T) {
 			return nil, &ent.NotFoundError{}
 		},
 	}
-	svc := newTestService(resource, &data.MessagePublisherMock{})
+	svc := newTestService(resource, &client.MessagePublisherMock{})
 
 	_, err := svc.UpdatePost(authedCtx(testClaim()), &postv1.UpdatePostRequest{Id: testPostID.String()})
 
@@ -270,7 +270,7 @@ func TestUpdatePost_Forbidden(t *testing.T) {
 			return nil, ucpost.ErrForbidden
 		},
 	}
-	svc := newTestService(resource, &data.MessagePublisherMock{})
+	svc := newTestService(resource, &client.MessagePublisherMock{})
 
 	_, err := svc.UpdatePost(authedCtx(testClaim()), &postv1.UpdatePostRequest{Id: testPostID.String()})
 
@@ -293,7 +293,7 @@ func TestDeletePost_Success(t *testing.T) {
 			return nil
 		},
 	}
-	publisher := &data.MessagePublisherMock{
+	publisher := &client.MessagePublisherMock{
 		PublishFunc: func(topic string, msgs ...*message.Message) error {
 			if topic != "post.deleted" {
 				t.Errorf("expected topic post.deleted, got %s", topic)
@@ -320,7 +320,7 @@ func TestDeletePost_Success(t *testing.T) {
 }
 
 func TestDeletePost_Unauthenticated(t *testing.T) {
-	svc := newTestService(&PostResourceMock{}, &data.MessagePublisherMock{})
+	svc := newTestService(&PostResourceMock{}, &client.MessagePublisherMock{})
 
 	_, err := svc.DeletePost(context.Background(), &postv1.DeletePostRequest{Id: testPostID.String()})
 
@@ -335,7 +335,7 @@ func TestDeletePost_NotFound(t *testing.T) {
 			return &ent.NotFoundError{}
 		},
 	}
-	svc := newTestService(resource, &data.MessagePublisherMock{})
+	svc := newTestService(resource, &client.MessagePublisherMock{})
 
 	_, err := svc.DeletePost(authedCtx(testClaim()), &postv1.DeletePostRequest{Id: testPostID.String()})
 

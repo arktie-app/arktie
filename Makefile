@@ -65,7 +65,7 @@ lint:
 	@go vet ./...
 	@if command -v goimports >/dev/null 2>&1; then \
 		echo "Running goimports..."; \
-		goimports -w -local arktie.org $$(find . -type f -name '*.go' -not -path './ent/*' -not -path './**/mock_*' -not -path './**/kessoku_band.go'); \
+		goimports -w -local arktie.org $$(find . -type f -name '*.go' -not -path './ent/*' -not -path './**/mock_*' -not -path './**/kessoku_band.go' -not -path './internal/pb/**'); \
 	else \
 		echo "goimports not found, skipping..."; \
 	fi

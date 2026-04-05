@@ -31,7 +31,8 @@ description: 遵循社群公認的標準 Go 專案佈局 (Standard Go Project La
 
 ## 2. 服務與 Web 目錄 (Service & Web)
 
-- **`/api`**：OpenAPI/Swagger 規格、JSON Schema、Proto 定義檔。
+- **`/api`**：OpenAPI/Swagger 規格、JSON Schema。
+- **`/proto`**：Protobuf 定義。
 - **`/web`**：靜態檔案、伺服器端模板、SPA 相關組件。
 
 ## 3. 支撐與配置目錄 (Support & Configs)

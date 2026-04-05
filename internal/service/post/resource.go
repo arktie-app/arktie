@@ -37,9 +37,9 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
-		if err := svc.client.Publisher.Publish("post.created", msg); err != nil {
+		if err := svc.event.Publisher.Publish("post.created", msg); err != nil {
 			slog.ErrorContext(ctx, "failed to publish post.create", liblogs.ErrAttr(err))
-			return nil, status.Error(codes.Internal, "failedc to publish post.create")
+			return nil, status.Error(codes.Internal, "failed to publish post.create")
 		}
 	} else {
 		return nil, status.Error(codes.Internal, "failed to encode json")
@@ -96,7 +96,7 @@ func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostReques
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), payload)
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
-		if err := svc.client.Publisher.Publish("post.updated", msg); err != nil {
+		if err := svc.event.Publisher.Publish("post.updated", msg); err != nil {
 			slog.ErrorContext(ctx, "failed to publish post.update", liblogs.ErrAttr(err))
 			return nil, status.Error(codes.Internal, "failed to publish post.update")
 		}
@@ -134,7 +134,7 @@ func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostReques
 		msg := message.NewMessage(uuid.Must(uuid.NewV7()).String(), message.Payload(id.String()))
 		msg.Metadata.Set("account_did", claim.ATProto.Session.AccountDID.String())
 		msg.Metadata.Set("session_id", claim.ATProto.Session.SessionID)
-		if err := svc.client.Publisher.Publish("post.deleted", msg); err != nil {
+		if err := svc.event.Publisher.Publish("post.deleted", msg); err != nil {
 			slog.ErrorContext(ctx, "failed to publish post.deleted", liblogs.ErrAttr(err))
 			return nil, status.Error(codes.Internal, "failed to publish post.deleted")
 		}

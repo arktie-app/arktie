@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 
 	"arktie.org/internal/data"
+	dataclient "arktie.org/internal/data/client"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/oauth"
 	"arktie.org/internal/service/post"
@@ -24,7 +25,9 @@ import (
 //nolint:unused
 var _ = kessoku.Inject[*App](
 	"newApp",
-	kessoku.Provide(data.NewClient),
+	kessoku.Provide(dataclient.NewDatabase),
+	kessoku.Provide(dataclient.NewEvent),
+	kessoku.Provide(dataclient.NewOAuth),
 
 	// usecase
 	kessoku.Provide(user.NewUsecase),
@@ -59,13 +62,13 @@ var _ = kessoku.Inject[*App](
 	kessoku.Provide(server.NewListener),
 
 	// app
-	kessoku.Provide(func(cfg *data.Config, client *data.Client, handler http.Handler, _ *server.Listener) *App {
+	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, handler http.Handler, _ *server.Listener) *App {
 		return &App{
 			HTTP: &http.Server{
 				Addr:    cfg.Server.Addr,
 				Handler: h2c.NewHandler(handler, &http2.Server{}),
 			},
-			Router: client.Router,
+			Router: event.Router,
 		}
 	}),
 )

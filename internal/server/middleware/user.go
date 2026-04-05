@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/libhttp"
 	"arktie.org/internal/lib/libjwt"
 	"arktie.org/internal/lib/liblogs"
@@ -29,10 +30,10 @@ type ctxKey struct{}
 // claim in the request context.
 //
 // It does not block request even if user is not authenticated.
-func User(cfg *data.Config, client *data.Client) func(http.Handler) http.Handler {
+func User(cfg *data.Config, db *client.Database) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if claim, err := authenticate(cfg, client.RDB, r); err == nil {
+			if claim, err := authenticate(cfg, db.RDB, r); err == nil {
 				ctx := context.WithValue(r.Context(), ctxKey{}, claim)
 				r = r.WithContext(ctx)
 			}
@@ -46,10 +47,10 @@ func User(cfg *data.Config, client *data.Client) func(http.Handler) http.Handler
 // claim in the request context.
 //
 // It bloks with response "401 Unauthorized" if user is not authenticated.
-func RequireUser(cfg *data.Config, client *data.Client) func(http.Handler) http.Handler {
+func RequireUser(cfg *data.Config, db *client.Database) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			claim, err := authenticate(cfg, client.RDB, r)
+			claim, err := authenticate(cfg, db.RDB, r)
 			if err != nil {
 				if errors.Is(err, errInternal) {
 					slog.ErrorContext(r.Context(), "internal server error", liblogs.ErrAttr(err))
@@ -64,13 +65,6 @@ func RequireUser(cfg *data.Config, client *data.Client) func(http.Handler) http.
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
-}
-
-// UserFromContext returns the JWT claim stored in the context by the User
-// middleware. Returns nil if no valid token was present.
-func UserFromContext(ctx context.Context) *libjwt.Claim {
-	claim, _ := ctx.Value(ctxKey{}).(*libjwt.Claim)
-	return claim
 }
 
 func tokenFromHeader(r *http.Request) string {

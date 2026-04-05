@@ -61,15 +61,17 @@ The project uses [kessoku](https://github.com/mazrean/kessoku) for compile-time 
 ### Project Layout
 
 ```
-cmd/arktie/       # Application entrypoint and DI wiring
-cmd/cli/          # CLI tools (migrate, etc.)
-internal/data/    # Configuration, database client
-internal/server/  # HTTP handler, routing, middleware
-internal/service/ # Service layer (oauth, etc.)
-internal/usecase/ # Business logic / use cases
-internal/lib/     # Shared utilities (libhttp, libjwt, liblogs, liberrs)
-ent/              # Ent ORM (generated code + schema/)
-configs/          # YAML configuration files
+cmd/arktie/          # Application entrypoint and DI wiring
+cmd/cli/             # CLI tools (migrate, etc.)
+internal/data/       # Configuration, external client initialization
+internal/data/client/# Database, OAuth, event and messaging clients
+internal/pb/         # Protobuf generated code (gRPC services + gateways)
+internal/server/     # HTTP handler, routing, middleware
+internal/service/    # Service layer (oauth, post, etc.)
+internal/usecase/    # Business logic / use cases
+internal/lib/        # Shared utilities (libhttp, libjwt, liblogs, liberrs)
+ent/                 # Ent ORM (generated code + schema/)
+configs/             # YAML configuration files
 ```
 
 ## Custom Skills

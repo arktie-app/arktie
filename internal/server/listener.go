@@ -3,35 +3,35 @@ package server
 import (
 	"github.com/ThreeDotsLabs/watermill/message"
 
-	"arktie.org/internal/data"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/service/post"
 )
 
 type Listener struct{}
 
 func NewListener(
-	client *data.Client,
+	event *client.Event,
 
 	postSyncher PostSyncher,
 ) *Listener {
-	client.Router.AddConsumerHandler(
+	event.Router.AddConsumerHandler(
 		"post.created",
 		"post.created",
-		client.Subscriber,
+		event.Subscriber,
 		postSyncher.Create,
 	)
 
-	client.Router.AddConsumerHandler(
+	event.Router.AddConsumerHandler(
 		"post.updated",
 		"post.updated",
-		client.Subscriber,
+		event.Subscriber,
 		postSyncher.Update,
 	)
 
-	client.Router.AddConsumerHandler(
+	event.Router.AddConsumerHandler(
 		"post.deleted",
 		"post.deleted",
-		client.Subscriber,
+		event.Subscriber,
 		postSyncher.Delete,
 	)
 
