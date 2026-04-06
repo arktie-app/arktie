@@ -24,7 +24,7 @@ func newApp(config *data.Config) (*App, error) {
 		var zero *App
 		return zero, err0
 	}
-	firehoseService := kessoku.Provide(post.NewFirehoseService).Fn()(config, event)
+	firehoseService := kessoku.Provide(post.NewFirehoseService).Fn()(config, database, event)
 	var err1 error
 	oauth, err1 := kessoku.Provide(client.NewOAuth).Fn()(config, database)
 	if err1 != nil {

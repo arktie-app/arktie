@@ -20,6 +20,7 @@ import (
 	"github.com/ipfs/go-cid"
 	cbornode "github.com/ipfs/go-ipld-cbor"
 
+	"arktie.org/ent/user"
 	"arktie.org/internal/data"
 	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/liblogs"
@@ -29,17 +30,18 @@ const collection = "app.arktie.post"
 
 type FirehoseService struct {
 	cfg   *data.Config
+	db    *client.Database
 	event *client.Event
 }
 
-func NewFirehoseService(cfg *data.Config, event *client.Event) *FirehoseService {
-	return &FirehoseService{cfg: cfg, event: event}
+func NewFirehoseService(cfg *data.Config, db *client.Database, event *client.Event) *FirehoseService {
+	return &FirehoseService{cfg: cfg, db: db, event: event}
 }
 
 func (s *FirehoseService) Subscribe(ctx context.Context, conn *websocket.Conn) error {
 	callbacks := &events.RepoStreamCallbacks{
 		RepoCommit: func(evt *comatproto.SyncSubscribeRepos_Commit) error {
-			return s.handleCommit(evt)
+			return s.handleCommit(ctx, evt)
 		},
 		Error: func(evt *events.ErrorFrame) error {
 			slog.Error("firehose error", slog.String("error", evt.Error), slog.String("message", evt.Message))
@@ -52,7 +54,7 @@ func (s *FirehoseService) Subscribe(ctx context.Context, conn *websocket.Conn) e
 	return events.HandleRepoStream(ctx, conn, sched, slog.Default())
 }
 
-func (s *FirehoseService) handleCommit(evt *comatproto.SyncSubscribeRepos_Commit) error {
+func (s *FirehoseService) handleCommit(ctx context.Context, evt *comatproto.SyncSubscribeRepos_Commit) error {
 	for _, op := range evt.Ops {
 		if !strings.HasPrefix(op.Path, collection+"/") {
 			continue
@@ -75,7 +77,7 @@ func (s *FirehoseService) handleCommit(evt *comatproto.SyncSubscribeRepos_Commit
 				continue
 			}
 
-			if shouldIgnore(record.PublishedFrom, s.cfg.App.URL) {
+			if s.shouldIgnore(ctx, evt.Repo, record.PublishedFrom) {
 				continue
 			}
 
@@ -105,7 +107,7 @@ func (s *FirehoseService) handleCommit(evt *comatproto.SyncSubscribeRepos_Commit
 	return nil
 }
 
-func shouldIgnore(from string, appURL *url.URL) bool {
+func (s *FirehoseService) shouldIgnore(ctx context.Context, repo, from string) bool {
 	if from == "" {
 		return true
 	}
@@ -120,7 +122,16 @@ func shouldIgnore(from string, appURL *url.URL) bool {
 		return true
 	}
 
-	if appURL != nil && from == appURL.String() {
+	if s.cfg.App.URL != nil && from == s.cfg.App.URL.String() {
+		return true
+	}
+
+	exists, err := s.db.Ent.User.Query().Where(user.AccountDid(repo)).Exist(ctx)
+	if err != nil {
+		slog.Error("failed to check user existence", liblogs.ErrAttr(err), slog.String("repo", repo))
+		return true
+	}
+	if !exists {
 		return true
 	}
 
