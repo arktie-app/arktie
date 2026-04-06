@@ -126,6 +126,7 @@ func (s *FirehoseService) shouldIgnore(ctx context.Context, repo, from string) b
 		return true
 	}
 
+	// TODO: It queries database to check user exists, cache it in future.
 	exists, err := s.db.Ent.User.Query().Where(user.AccountDid(repo)).Exist(ctx)
 	if err != nil {
 		slog.Error("failed to check user existence", liblogs.ErrAttr(err), slog.String("repo", repo))
