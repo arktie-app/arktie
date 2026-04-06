@@ -16,6 +16,7 @@ import (
 	"github.com/bluesky-social/indigo/events"
 	"github.com/bluesky-social/indigo/events/schedulers/sequential"
 	"github.com/bluesky-social/indigo/repo/carutil"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/gorilla/websocket"
 	"github.com/ipfs/go-cid"
 	cbornode "github.com/ipfs/go-ipld-cbor"
@@ -177,14 +178,9 @@ func extractRecord(evt *comatproto.SyncSubscribeRepos_Commit, op *comatproto.Syn
 			return nil, fmt.Errorf("failed to decode CBOR record: %w", err)
 		}
 
-		jsonBytes, err := json.Marshal(raw)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal record to JSON: %w", err)
-		}
-
 		var rec data.PDSRecord
-		if err := json.Unmarshal(jsonBytes, &rec); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal record: %w", err)
+		if err := mapstructure.Decode(raw, &rec); err != nil {
+			return nil, fmt.Errorf("failed to decode record: %w", err)
 		}
 
 		return &rec, nil
