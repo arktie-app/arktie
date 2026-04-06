@@ -56,6 +56,20 @@ func (_c *PostCreate) SetNillableAtURL(v *string) *PostCreate {
 	return _c
 }
 
+// SetPublishFrom sets the "publish_from" field.
+func (_c *PostCreate) SetPublishFrom(v string) *PostCreate {
+	_c.mutation.SetPublishFrom(v)
+	return _c
+}
+
+// SetNillablePublishFrom sets the "publish_from" field if the given value is not nil.
+func (_c *PostCreate) SetNillablePublishFrom(v *string) *PostCreate {
+	if v != nil {
+		_c.SetPublishFrom(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *PostCreate) SetCreatedAt(v time.Time) *PostCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -208,6 +222,10 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AtURL(); ok {
 		_spec.SetField(post.FieldAtURL, field.TypeString, value)
 		_node.AtURL = &value
+	}
+	if value, ok := _c.mutation.PublishFrom(); ok {
+		_spec.SetField(post.FieldPublishFrom, field.TypeString, value)
+		_node.PublishFrom = &value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(post.FieldCreatedAt, field.TypeTime, value)

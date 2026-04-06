@@ -7,41 +7,82 @@ import (
 	"arktie.org/internal/service/post"
 )
 
-type Listener struct{}
+// PostPusher publish posts which local created to PDS
+type PostPusher interface {
+	PushCreate(msg *message.Message) error
+	PushUpdate(msg *message.Message) error
+	PushDelete(msg *message.Message) error
+}
 
-func NewListener(
+var _ PostPusher = &post.SyncService{}
+
+// PostPuller get posts from PDS and store into local
+type PostPuller interface {
+	PullCreate(msg *message.Message) error
+	PullUpdate(msg *message.Message) error
+	PullDelete(msg *message.Message) error
+}
+
+var _ PostPuller = &post.SyncService{}
+
+type AppListener struct{}
+
+func NewAppListener(
 	event *client.Event,
 
-	postSyncher PostSyncher,
-) *Listener {
+	post PostPusher,
+) *AppListener {
 	event.Router.AddConsumerHandler(
 		"post.created",
 		"post.created",
 		event.Subscriber,
-		postSyncher.Create,
+		post.PushCreate,
 	)
 
 	event.Router.AddConsumerHandler(
 		"post.updated",
 		"post.updated",
 		event.Subscriber,
-		postSyncher.Update,
+		post.PushUpdate,
 	)
 
 	event.Router.AddConsumerHandler(
 		"post.deleted",
 		"post.deleted",
 		event.Subscriber,
-		postSyncher.Delete,
+		post.PushDelete,
 	)
 
-	return &Listener{}
+	return &AppListener{}
 }
 
-type PostSyncher interface {
-	Create(msg *message.Message) error
-	Update(msg *message.Message) error
-	Delete(msg *message.Message) error
-}
+type FirehoseListener struct{}
 
-var _ PostSyncher = &post.Service{}
+func NewFirehoseListener(
+	event *client.Event,
+
+	post PostPuller,
+) *FirehoseListener {
+	event.Router.AddConsumerHandler(
+		"firehose.post.create",
+		"firehose.post.create",
+		event.Subscriber,
+		post.PullCreate,
+	)
+
+	event.Router.AddConsumerHandler(
+		"firehose.post.update",
+		"firehose.post.update",
+		event.Subscriber,
+		post.PullUpdate,
+	)
+
+	event.Router.AddConsumerHandler(
+		"firehose.post.delete",
+		"firehose.post.delete",
+		event.Subscriber,
+		post.PullDelete,
+	)
+
+	return &FirehoseListener{}
+}

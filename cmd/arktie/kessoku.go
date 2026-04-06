@@ -50,19 +50,18 @@ var _ = kessoku.Inject[*App](
 	kessoku.Bind[server.OAuthHandler](
 		kessoku.Provide(func(s *oauth.Service) server.OAuthHandler { return s }),
 	),
-	kessoku.Provide(post.NewService),
-	kessoku.Bind[server.PostSyncher](
-		kessoku.Provide(func(s *post.Service) server.PostSyncher { return s }),
+	kessoku.Provide(post.NewResourceService),
+	kessoku.Provide(post.NewSyncService),
+	kessoku.Bind[server.PostPusher](
+		kessoku.Provide(func(s *post.SyncService) server.PostPusher { return s }),
 	),
 
-	// handlers
+	// server / handlers / listener
 	kessoku.Provide(server.NewHandler),
-
-	// listeners
-	kessoku.Provide(server.NewListener),
+	kessoku.Provide(server.NewAppListener),
 
 	// app
-	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, handler http.Handler, _ *server.Listener) *App {
+	kessoku.Provide(func(cfg *data.Config, event *dataclient.Event, handler http.Handler, _ *server.AppListener) *App {
 		return &App{
 			HTTP: &http.Server{
 				Addr:    cfg.Server.Addr,

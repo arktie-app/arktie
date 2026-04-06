@@ -25,6 +25,8 @@ type Post struct {
 	MarkdownContent *string `json:"markdown_content,omitempty"`
 	// AtURL holds the value of the "at_url" field.
 	AtURL *string `json:"at_url,omitempty"`
+	// PublishFrom holds the value of the "publish_from" field.
+	PublishFrom *string `json:"publish_from,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -60,7 +62,7 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case post.FieldMarkdownContent, post.FieldAtURL:
+		case post.FieldMarkdownContent, post.FieldAtURL, post.FieldPublishFrom:
 			values[i] = new(sql.NullString)
 		case post.FieldCreatedAt, post.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -106,6 +108,13 @@ func (_m *Post) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AtURL = new(string)
 				*_m.AtURL = value.String
+			}
+		case post.FieldPublishFrom:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field publish_from", values[i])
+			} else if value.Valid {
+				_m.PublishFrom = new(string)
+				*_m.PublishFrom = value.String
 			}
 		case post.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -170,6 +179,11 @@ func (_m *Post) String() string {
 	builder.WriteString(", ")
 	if v := _m.AtURL; v != nil {
 		builder.WriteString("at_url=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.PublishFrom; v != nil {
+		builder.WriteString("publish_from=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

@@ -11,13 +11,30 @@ import (
 	"google.golang.org/grpc/status"
 
 	"arktie.org/ent"
+	"arktie.org/internal/data/client"
 	"arktie.org/internal/lib/liblogs"
 	postv1 "arktie.org/internal/pb/post/v1"
 	"arktie.org/internal/server/middleware"
 	ucpost "arktie.org/internal/usecase/post"
 )
 
-func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostRequest) (*postv1.CreatePostResponse, error) {
+type ResourceService struct {
+	postv1.UnimplementedPostServiceServer
+
+	event    *client.Event
+	resource PostResource
+}
+
+var _ postv1.PostServiceServer = &ResourceService{}
+
+func NewResourceService(event *client.Event, resource PostResource) *ResourceService {
+	return &ResourceService{
+		event:    event,
+		resource: resource,
+	}
+}
+
+func (svc *ResourceService) CreatePost(ctx context.Context, req *postv1.CreatePostRequest) (*postv1.CreatePostResponse, error) {
 	claim := middleware.UserFromContext(ctx)
 	if claim == nil {
 		return nil, status.Error(codes.Unauthenticated, "authentication required")
@@ -48,7 +65,7 @@ func (svc *Service) CreatePost(ctx context.Context, req *postv1.CreatePostReques
 	return &postv1.CreatePostResponse{Post: p.ToProto()}, nil
 }
 
-func (svc *Service) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*postv1.GetPostResponse, error) {
+func (svc *ResourceService) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*postv1.GetPostResponse, error) {
 	id, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid post id")
@@ -65,7 +82,7 @@ func (svc *Service) GetPost(ctx context.Context, req *postv1.GetPostRequest) (*p
 	return &postv1.GetPostResponse{Post: p.ToProto()}, nil
 }
 
-func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostRequest) (*postv1.UpdatePostResponse, error) {
+func (svc *ResourceService) UpdatePost(ctx context.Context, req *postv1.UpdatePostRequest) (*postv1.UpdatePostResponse, error) {
 	claim := middleware.UserFromContext(ctx)
 	if claim == nil {
 		return nil, status.Error(codes.Unauthenticated, "authentication required")
@@ -107,7 +124,7 @@ func (svc *Service) UpdatePost(ctx context.Context, req *postv1.UpdatePostReques
 	return &postv1.UpdatePostResponse{Post: updated.ToProto()}, nil
 }
 
-func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostRequest) (*postv1.DeletePostResponse, error) {
+func (svc *ResourceService) DeletePost(ctx context.Context, req *postv1.DeletePostRequest) (*postv1.DeletePostResponse, error) {
 	claim := middleware.UserFromContext(ctx)
 	if claim == nil {
 		return nil, status.Error(codes.Unauthenticated, "authentication required")
@@ -142,3 +159,13 @@ func (svc *Service) DeletePost(ctx context.Context, req *postv1.DeletePostReques
 
 	return &postv1.DeletePostResponse{}, nil
 }
+
+//go:generate go tool moq -rm -out mock_post_resource.go . PostResource
+type PostResource interface {
+	Create(ctx context.Context, userID uuid.UUID, markdownContent *string) (*ent.Post, error)
+	Get(ctx context.Context, id uuid.UUID) (*ent.Post, error)
+	Update(ctx context.Context, id uuid.UUID, userID uuid.UUID, markdownContent *string) (*ent.Post, error)
+	Delete(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
+}
+
+var _ PostResource = &ucpost.Usecase{}

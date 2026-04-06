@@ -41,10 +41,13 @@ func authedCtx(claim *libjwt.Claim) context.Context {
 	return middleware.ContextWithUser(context.Background(), claim)
 }
 
-func newTestService(resource *PostResourceMock, publisher *client.MessagePublisherMock) *Service {
-	return NewService(resource, &PDSRecordAPIMock{}, &client.Database{}, &client.Event{
-		Publisher: publisher,
-	})
+func newTestService(resource *PostResourceMock, publisher *client.MessagePublisherMock) *ResourceService {
+	return NewResourceService(
+		&client.Event{
+			Publisher: publisher,
+		},
+		resource,
+	)
 }
 
 func newPost(id, userID uuid.UUID, content *string) *ent.Post {
