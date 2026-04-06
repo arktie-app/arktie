@@ -14,6 +14,12 @@ import (
 	"arktie.org/internal/lib/liblogs"
 )
 
+// Name is the name of the application.
+var Name string
+
+// Version is the version of the application.
+var Version string
+
 var cfgPath string
 
 func main() {
@@ -34,7 +40,7 @@ func main() {
 func run(cmd *cobra.Command, args []string) error {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
-	cfg, err := data.NewConfig("", "", cfgPath)
+	cfg, err := data.NewConfig(Name, Version, cfgPath)
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
