@@ -47,16 +47,17 @@ func newApp(config *data.Config) (*App, error) {
 	pdsrecordAPI := kessoku.Bind[post.PDSRecordAPI](kessoku.Provide(func(p *post0.PDSRecord) post.PDSRecordAPI {
 		return p
 	})).Fn()(pdsrecord)
+	resourceService := kessoku.Provide(post.NewResourceService).Fn()(event, postResource)
 	service := kessoku.Provide(oauth.NewService).Fn()(config, oauth0, userAttempter)
-	service0 := kessoku.Provide(post.NewService).Fn()(config, database, event, postResource, pdsrecordAPI)
+	syncService := kessoku.Provide(post.NewSyncService).Fn()(database, pdsrecordAPI)
 	oauthHandler := kessoku.Bind[server.OAuthHandler](kessoku.Provide(func(s *oauth.Service) server.OAuthHandler {
 		return s
 	})).Fn()(service)
-	postSyncher := kessoku.Bind[server.PostSyncher](kessoku.Provide(func(s *post.Service) server.PostSyncher {
+	postPusher := kessoku.Bind[server.PostPusher](kessoku.Provide(func(s *post.SyncService) server.PostPusher {
 		return s
-	})).Fn()(service0)
-	handler := kessoku.Provide(server.NewHandler).Fn()(config, database, oauthHandler, service0)
-	appListener := kessoku.Provide(server.NewListener).Fn()(event, postSyncher)
+	})).Fn()(syncService)
+	handler := kessoku.Provide(server.NewHandler).Fn()(config, database, oauthHandler, resourceService)
+	appListener := kessoku.Provide(server.NewAppListener).Fn()(event, postPusher)
 	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, handler http.Handler, _ *server.AppListener) *App {
 		return &App{HTTP: &http.Server{Addr: cfg.Server.Addr, Handler: h2c.NewHandler(handler, &http2.Server{})}, Router: event.Router}
 	}).Fn()(config, event, handler, appListener)

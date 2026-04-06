@@ -7,24 +7,39 @@ import (
 	"arktie.org/internal/data/client"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/post"
+	post0 "arktie.org/internal/usecase/post"
 	"github.com/mazrean/kessoku"
 )
 
 func newApp(config *data.Config) (*App, error) {
-	firehoseLogHandler := kessoku.Provide(func() *FirehoseLogHandler {
-		return &FirehoseLogHandler{}
-	}).Fn()()
 	var err error
 	event, err := kessoku.Provide(client.NewEvent).Fn()(config)
 	if err != nil {
 		var zero *App
 		return zero, err
 	}
-	firehosePostHandler := kessoku.Bind[server.FirehosePostHandler](kessoku.Provide(func(h *FirehoseLogHandler) server.FirehosePostHandler {
-		return h
-	})).Fn()(firehoseLogHandler)
+	var err0 error
+	database, err0 := kessoku.Provide(client.NewDatabase).Fn()(config)
+	if err0 != nil {
+		var zero *App
+		return zero, err0
+	}
 	firehoseService := kessoku.Provide(post.NewFirehoseService).Fn()(config, event)
-	firehoseListener := kessoku.Provide(server.NewFirehoseListener).Fn()(event, firehosePostHandler)
+	var err1 error
+	oauth, err1 := kessoku.Provide(client.NewOAuth).Fn()(config, database)
+	if err1 != nil {
+		var zero *App
+		return zero, err1
+	}
+	pdsrecord := kessoku.Provide(post0.NewPDSRecord).Fn()(config, oauth)
+	pdsrecordAPI := kessoku.Bind[post.PDSRecordAPI](kessoku.Provide(func(p *post0.PDSRecord) post.PDSRecordAPI {
+		return p
+	})).Fn()(pdsrecord)
+	syncService := kessoku.Provide(post.NewSyncService).Fn()(database, pdsrecordAPI)
+	postPuller := kessoku.Bind[server.PostPuller](kessoku.Provide(func(s *post.SyncService) server.PostPuller {
+		return s
+	})).Fn()(syncService)
+	firehoseListener := kessoku.Provide(server.NewFirehoseListener).Fn()(event, postPuller)
 	app := kessoku.Provide(func(cfg *data.Config, event *client.Event, firehose *post.FirehoseService, _ *server.FirehoseListener) *App {
 		return &App{Config: cfg, Event: event, Firehose: firehose}
 	}).Fn()(config, event, firehoseService, firehoseListener)

@@ -21,7 +21,7 @@ func NewHandler(
 	db *client.Database,
 
 	oauth OAuthHandler,
-	postSvc *post.Service,
+	postSvc *post.ResourceService,
 ) http.Handler {
 	mux := chi.NewMux()
 

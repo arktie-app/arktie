@@ -7,76 +7,82 @@ import (
 	"arktie.org/internal/service/post"
 )
 
+// PostPusher publish posts which local created to PDS
+type PostPusher interface {
+	PushCreate(msg *message.Message) error
+	PushUpdate(msg *message.Message) error
+	PushDelete(msg *message.Message) error
+}
+
+var _ PostPusher = &post.SyncService{}
+
+// PostPuller get posts from PDS and store into local
+type PostPuller interface {
+	PullCreate(msg *message.Message) error
+	PullUpdate(msg *message.Message) error
+	PullDelete(msg *message.Message) error
+}
+
+var _ PostPuller = &post.SyncService{}
+
 type AppListener struct{}
 
-func NewListener(
+func NewAppListener(
 	event *client.Event,
 
-	postSyncher PostSyncher,
+	post PostPusher,
 ) *AppListener {
 	event.Router.AddConsumerHandler(
 		"post.created",
 		"post.created",
 		event.Subscriber,
-		postSyncher.Create,
+		post.PushCreate,
 	)
 
 	event.Router.AddConsumerHandler(
 		"post.updated",
 		"post.updated",
 		event.Subscriber,
-		postSyncher.Update,
+		post.PushUpdate,
 	)
 
 	event.Router.AddConsumerHandler(
 		"post.deleted",
 		"post.deleted",
 		event.Subscriber,
-		postSyncher.Delete,
+		post.PushDelete,
 	)
 
 	return &AppListener{}
 }
-
-type PostSyncher interface {
-	Create(msg *message.Message) error
-	Update(msg *message.Message) error
-	Delete(msg *message.Message) error
-}
-
-var _ PostSyncher = &post.Service{}
 
 type FirehoseListener struct{}
 
 func NewFirehoseListener(
 	event *client.Event,
 
-	handler FirehosePostHandler,
+	post PostPuller,
 ) *FirehoseListener {
 	event.Router.AddConsumerHandler(
 		"firehose.post.create",
 		"firehose.post.create",
 		event.Subscriber,
-		handler.HandlePost,
+		post.PullCreate,
 	)
 
 	event.Router.AddConsumerHandler(
 		"firehose.post.update",
 		"firehose.post.update",
 		event.Subscriber,
-		handler.HandlePost,
+		post.PullUpdate,
 	)
 
 	event.Router.AddConsumerHandler(
 		"firehose.post.delete",
 		"firehose.post.delete",
 		event.Subscriber,
-		handler.HandlePost,
+		post.PullDelete,
 	)
 
 	return &FirehoseListener{}
-}
-
-type FirehosePostHandler interface {
-	HandlePost(msg *message.Message) error
 }

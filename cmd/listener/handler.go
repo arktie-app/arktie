@@ -5,13 +5,9 @@ import (
 	"log/slog"
 
 	"github.com/ThreeDotsLabs/watermill/message"
-
-	"arktie.org/internal/server"
 )
 
 type FirehoseLogHandler struct{}
-
-var _ server.FirehosePostHandler = &FirehoseLogHandler{}
 
 func (h *FirehoseLogHandler) HandlePost(msg *message.Message) error {
 	repo := msg.Metadata.Get("repo")

@@ -9,18 +9,28 @@ import (
 	dataclient "arktie.org/internal/data/client"
 	"arktie.org/internal/server"
 	"arktie.org/internal/service/post"
+	ucpost "arktie.org/internal/usecase/post"
 )
 
 //nolint:unused
 var _ = kessoku.Inject[*App](
 	"newApp",
+	kessoku.Provide(dataclient.NewDatabase),
 	kessoku.Provide(dataclient.NewEvent),
+	kessoku.Provide(dataclient.NewOAuth),
+
+	kessoku.Provide(ucpost.NewPDSRecord),
+	kessoku.Bind[post.PDSRecordAPI](
+		kessoku.Provide(func(p *ucpost.PDSRecord) post.PDSRecordAPI { return p }),
+	),
 
 	kessoku.Provide(post.NewFirehoseService),
-
-	kessoku.Provide(func() *FirehoseLogHandler { return &FirehoseLogHandler{} }),
-	kessoku.Bind[server.FirehosePostHandler](
-		kessoku.Provide(func(h *FirehoseLogHandler) server.FirehosePostHandler { return h }),
+	kessoku.Provide(post.NewSyncService),
+	kessoku.Bind[server.PostPuller](
+		kessoku.Provide(func(s *post.SyncService) server.PostPuller { return s }),
+	),
+	kessoku.Bind[server.PostPusher](
+		kessoku.Provide(func(s *post.SyncService) server.PostPusher { return s }),
 	),
 
 	kessoku.Provide(server.NewFirehoseListener),
