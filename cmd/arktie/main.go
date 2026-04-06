@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 
@@ -64,7 +66,10 @@ func serveCmd() *cobra.Command {
 				return fmt.Errorf("failed to init app: %w", err)
 			}
 
-			return app.Run(context.Background())
+			ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+			defer stop()
+
+			return app.Run(ctx)
 		},
 	}
 }

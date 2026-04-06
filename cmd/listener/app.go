@@ -4,13 +4,16 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"golang.org/x/sync/errgroup"
 
 	"arktie.org/internal/data"
 	"arktie.org/internal/data/client"
+	"arktie.org/internal/lib/liblogs"
 	"arktie.org/internal/service/post"
 )
 
@@ -37,6 +40,39 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) subscribeFirehose(ctx context.Context) error {
+	const (
+		baseDelay = 1 * time.Second
+		maxDelay  = 60 * time.Second
+	)
+
+	var attempt int
+	for {
+		err := a.connectAndListen(ctx)
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+
+		delay := time.Duration(math.Min(
+			float64(baseDelay)*math.Pow(2, float64(attempt)),
+			float64(maxDelay),
+		))
+		attempt++
+
+		slog.Error("firehose disconnected, reconnecting",
+			liblogs.ErrAttr(err),
+			slog.Duration("backoff", delay),
+			slog.Int("attempt", attempt),
+		)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(delay):
+		}
+	}
+}
+
+func (a *App) connectAndListen(ctx context.Context) error {
 	wsURL := a.Config.Service.Firehose.RelayURL.JoinPath("/xrpc/com.atproto.sync.subscribeRepos")
 
 	slog.Info("connecting to firehose", slog.String("url", wsURL.String()))
