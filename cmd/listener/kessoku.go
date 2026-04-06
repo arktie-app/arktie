@@ -29,9 +29,6 @@ var _ = kessoku.Inject[*App](
 	kessoku.Bind[server.PostPuller](
 		kessoku.Provide(func(s *post.SyncService) server.PostPuller { return s }),
 	),
-	kessoku.Bind[server.PostPusher](
-		kessoku.Provide(func(s *post.SyncService) server.PostPusher { return s }),
-	),
 
 	kessoku.Provide(server.NewFirehoseListener),
 

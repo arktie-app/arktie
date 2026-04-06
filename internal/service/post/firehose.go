@@ -93,6 +93,10 @@ func (s *FirehoseService) handleCommit(ctx context.Context, evt *comatproto.Sync
 			}
 
 		case "delete":
+			if s.shouldIgnoreRepo(ctx, evt.Repo) {
+				continue
+			}
+
 			topic := "firehose.post.delete"
 			msg := message.NewMessage("", []byte(op.Path))
 			msg.Metadata.Set("repo", evt.Repo)
@@ -126,6 +130,10 @@ func (s *FirehoseService) shouldIgnore(ctx context.Context, repo, from string) b
 		return true
 	}
 
+	return s.shouldIgnoreRepo(ctx, repo)
+}
+
+func (s *FirehoseService) shouldIgnoreRepo(ctx context.Context, repo string) bool {
 	// TODO: It queries database to check user exists, cache it in future.
 	exists, err := s.db.Ent.User.Query().Where(user.AccountDid(repo)).Exist(ctx)
 	if err != nil {
